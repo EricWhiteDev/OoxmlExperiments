@@ -1,9 +1,8 @@
 import React from "react";
 import {
   Button, Dropdown, Option, makeStyles,
-  Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, appendToSecondParagraph, insertParagraph, intenseReference, getAndSetOoxml, setFont, ooxmlPartialPara, modContentControl, createContentControl, modTableCell, modTableCell22, addTable, addHtml, addImage, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, setDocumentBody } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
 
@@ -67,24 +66,8 @@ const App: React.FC = () => {
 
   const onClickButton4 = () => entireDocumentToUpper();
   const onClickButton5 = () => entireDocumentToLower();
-  const onClickBodyParagraphs = () => appendToSecondParagraph();
-  const onClickInsertParagraph = () => insertParagraph();
-  const [intenseDialogOpen, setIntenseDialogOpen] = React.useState(false);
-  const onClickIntenseReference = async () => {
-    await intenseReference();
-    setIntenseDialogOpen(true);
-  };
-  const onClickGetAndSetOoxml = () => getAndSetOoxml();
-  const onClickSetFont = () => setFont();
   const [textViewerTitle, setTextViewerTitle] = React.useState("");
   const [textViewerText, setTextViewerText] = React.useState("");
-  const onClickOoxmlPartialPara = async () => {
-    const result = await ooxmlPartialPara();
-    if (result) {
-      setTextViewerTitle(result.title);
-      setTextViewerText(result.text);
-    }
-  };
 
   return (
     <div className={styles.root}>
@@ -106,40 +89,6 @@ const App: React.FC = () => {
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickButton4}>To Upper Case</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickButton5}>To Lower Case</Button>
       </div>
-      <div className={styles.row}>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickBodyParagraphs}>insertText</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickInsertParagraph}>insertParagraph</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickIntenseReference}>intenseReference</Button>
-      </div>
-      <div className={styles.row}>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetAndSetOoxml}>getAndSetOoxml</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetFont}>setFont</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickOoxmlPartialPara}>ooxmlPartialPara</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => addImage()}>addImage</Button>
-      </div>
-      <div className={styles.row}>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => addHtml()}>addHtml</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => addTable()}>addTable</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => modTableCell()}>modTableCell-1-1</Button>
-      </div>
-      <div className={styles.row}>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => modTableCell22()}>modTableCell-2-2</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => createContentControl()}>createContentControl</Button>
-      </div>
-      <div className={styles.row}>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={() => modContentControl()}>modContentControl</Button>
-      </div>
-      <Dialog open={intenseDialogOpen} onOpenChange={(_e, data) => setIntenseDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogBody>
-            <DialogTitle>intenseReference</DialogTitle>
-            <DialogContent>Changes the color, sets to caps, and sets to bold</DialogContent>
-            <DialogActions>
-              <Button appearance="primary" onClick={() => setIntenseDialogOpen(false)}>OK</Button>
-            </DialogActions>
-          </DialogBody>
-        </DialogSurface>
-      </Dialog>
       <div className={styles.spacer} />
       <hr className={styles.separator} />
       <div className={styles.textViewerSection}>
