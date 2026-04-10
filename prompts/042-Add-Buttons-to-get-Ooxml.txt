@@ -1,0 +1,5 @@
+in the taskpane, just above the multi-line text box, add the following:
+- a horizontal line divider
+- a button "Get Entire Document".  When the user clicks this button, get the entire body of the document, format it with indentation using LtXmlTs functionality that serializes with indenting, and then set textDisplay to the XML string. set textViewerTitle to "Entire Document"
+
+add empty space above the horizontal line divider.  when the task pane is resized, the existing drop down and To Upper Case and To Lower Case buttons stay at the top of the window, and the new controls stay just above the textDisplay.

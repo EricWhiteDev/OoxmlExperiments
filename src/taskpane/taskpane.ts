@@ -1,6 +1,7 @@
 /* global Word console */
 
 import { UpperLowerExperiments } from "./UpperLowerExperiments";
+import { WmlPackage } from "openxmlsdkts";
 
 export async function entireDocumentToUpper() {
   try {
@@ -38,6 +39,24 @@ export async function entireDocumentToLower() {
 
 
 
+
+export async function getEntireDocument(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxml = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxml.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const xDoc = await mainPart.getXDocument();
+      return xDoc.toStringWithIndentation();
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
 
 export async function setDocumentBody(xml: string) {
   try {

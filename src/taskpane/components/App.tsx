@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getEntireDocument, setDocumentBody } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
 
@@ -28,12 +28,6 @@ const useStyles = makeStyles({
   },
   spacer: {
     flex: 1,
-  },
-  separator: {
-    border: "none",
-    borderTop: "1px solid #e0e0e0",
-    marginTop: "0",
-    marginBottom: "0",
   },
   textViewerSection: {
     display: "flex",
@@ -68,6 +62,13 @@ const App: React.FC = () => {
   const onClickButton5 = () => entireDocumentToLower();
   const [textViewerTitle, setTextViewerTitle] = React.useState("");
   const [textViewerText, setTextViewerText] = React.useState("");
+  const onClickGetEntireDocument = async () => {
+    const result = await getEntireDocument();
+    if (result) {
+      setTextViewerTitle("Entire Document");
+      setTextViewerText(result);
+    }
+  };
 
   return (
     <div className={styles.root}>
@@ -90,7 +91,10 @@ const App: React.FC = () => {
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickButton5}>To Lower Case</Button>
       </div>
       <div className={styles.spacer} />
-      <hr className={styles.separator} />
+      <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetEntireDocument}>Get Entire Document</Button>
+      </div>
       <div className={styles.textViewerSection}>
         <div className={styles.textViewerTitle}>{textViewerTitle}</div>
         <div className={styles.textDisplay}>{textViewerText}</div>
