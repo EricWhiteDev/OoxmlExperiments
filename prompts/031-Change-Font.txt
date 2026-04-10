@@ -1,0 +1,10 @@
+Make a new button in the task pane to the right of getAndSetOoxml.  Name this button setFont.  When the user clicks this button, get the second paragraph, and then set the font to courier new, bold, 18pt:
+
+here is the code:
+
+const secondParagraph = context.document.body.paragraphs.getFirst().getNext();
+secondParagraph.font.set({
+        name: "Courier New",
+        bold: true,
+        size: 18
+    });

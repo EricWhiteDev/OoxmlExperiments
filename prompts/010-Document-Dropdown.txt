@@ -1,0 +1,10 @@
+Make the following enhancements to WordAddInExample:
+- In App.tsx, there are three buttons that initiate the body of the document.  These three buttons are 'Eric's Resume', 'Fictitious 35 Page Contract', and 'Fictitious 125 Page Contract'
+- I want a more extensible user interface for initiating the body of the document.  Replace the three buttons with a drop-downlist, and a 'Set' button.  For now, the drop down list will contain three entries, 'Eric's Resume', 'Fictitious 35 Page Contract', and 'Fictitious 125 Page Contract'.  We'll be adding more later.
+- The user will pick one of the three entries on the drop-down list, and then press the 'Set' button.
+- There is a function to call for each entry on the drop down list.  For now, the functions are:
+    initWithEricsResume();
+    initWith35pager();
+    initWith125pager();
+
+- The rest of the existing buttons in the task pane will continue to operate as they currently do.

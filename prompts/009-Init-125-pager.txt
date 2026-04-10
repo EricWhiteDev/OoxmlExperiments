@@ -1,0 +1,12 @@
+Make an enhancement to the class TestResources
+- In this class, make a new static method that returns a string. This method is called 'fictitious125pager'. Initialize this string with the XML that you find in 'fictitious-legal-document-125-pages.xml', which is in the test-files directory.
+
+In DocumentCleanup class, add a new method, initWith125pager.  This method returns the string from TestResources.fictitious125pager
+
+In taskpane.ts, add a new function, initWith125pager()
+- in this function, call DocumentCleanup.initWith125pager to get the XML that is going to become the contents of the Word document.
+- Then call body.insertOoxml(xml, Word.InsertLocation.replace);
+
+Wire up button3 in the taskpane to call initWith25pager.
+
+Rename button3 so that the button title is "Fictitious 125 Page Contract"

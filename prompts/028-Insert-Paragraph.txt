@@ -1,0 +1,6 @@
+Make a new button to the right of the body.paragraphs button.  Name this button insertParagraph.  When the user clicks this button, get the document.body, and add at the beginning, "Hello World", like this;
+
+const docBody = context.document.body;
+docBody.insertParagraph("Hello World", Word.InsertLocation.start);
+
+                    

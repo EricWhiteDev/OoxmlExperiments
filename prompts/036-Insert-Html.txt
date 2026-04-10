@@ -1,0 +1,4 @@
+Make a new button in the task pane after the addImage button.  Put the new button on the next row.  Name this button addHtml.  When the user clicks this button, add html to the end of the document, as follows:
+
+const blankParagraph = context.document.body.paragraphs.getLast().insertParagraph("", Word.InsertLocation.after);
+blankParagraph.insertHtml('<p style="font-family: verdana;">Inserted HTML.</p><p>Another paragraph</p>', Word.InsertLocation.end);

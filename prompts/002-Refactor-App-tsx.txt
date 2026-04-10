@@ -1,0 +1,20 @@
+In App.tsx, there are 8 buttons that are generated like this:
+
+    const BUTTONS = ["Button1", "Button2", "Button3", "Button4", "Button5", "Button6", "Button7", "Button8"] as const;
+
+    const App: React.FC<AppProps> = (props: AppProps) => {
+    const styles = useStyles();
+
+    return (
+        <div className={styles.root}>
+        <h2 className={styles.title}>{props.title}</h2>
+        {BUTTONS.map((label) => (
+            <Button key={label} appearance="primary" size="large" onClick={() => insertText(label)}>
+            {label}
+            </Button>
+        ))}
+        </div>
+    );
+    };
+
+Refactor this code so that there are 8 separate button elements, each with their own onClick event, so that we can more easily have each button execute its own code when clicked.

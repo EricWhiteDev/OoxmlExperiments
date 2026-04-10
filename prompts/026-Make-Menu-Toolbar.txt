@@ -1,0 +1,5 @@
+Enhance the word add-in as follows:
+- Add a top level menu item named "Experiments".  When the top level menu item is pressed, show a custom ribbon.
+- Add three buttons to the custom ribbon.  Lables are "test1", "test2", "test3".
+- when the user clicks one of the buttons, put up a modal dialog box that contains the lable. 
+- Note that this is the standard Office "Custom Tab" experience.

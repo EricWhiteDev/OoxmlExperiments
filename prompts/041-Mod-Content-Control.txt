@@ -1,0 +1,4 @@
+Make a new button in the task pane after the createContentControl button.  Name this button modContentControl.  Put on the next row.  When the user clicks this button, do the following.
+
+const serviceNameContentControl = context.document.contentControls.getByTag("serviceName").getFirst();
+serviceNameContentControl.insertText("Fabrikam Online Productivity Suite", Word.InsertLocation.replace);

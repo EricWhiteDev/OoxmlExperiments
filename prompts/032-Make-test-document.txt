@@ -1,0 +1,4 @@
+Make an enhancement to the class TestDocuments
+- In this class, make a new static method that returns a string. This method is called 'test1pager'. Initialize this string with the XML that you find in /Users/ericwhite/Experiments/test-files/test.xml.
+- Add an entry to testDocumentsMap - key is test1Pager, value is TestDocuments.test1pager()
+

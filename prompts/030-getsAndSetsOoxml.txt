@@ -1,0 +1,6 @@
+Make a new button in the task pane.  Name this button getAndSetOoxml.  When the user clicks this button, get the first paragraph, and then get the markup as Ooxml:
+- Use the LtXmlTs library - parse the XML
+- For every run in the paragraph
+- if there are no run properties (W.rPr), then add the element to the run.
+- Then add the W.b element to the run properties, making the run be bold.
+After making all the changes to the Ooxml, then serialize using toString, and put the Ooxml back, replacing the first paragraph with the modified markup.

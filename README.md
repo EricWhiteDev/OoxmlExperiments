@@ -1,2 +1,2 @@
-# OoxmlExperiments
-Word Add-In Ooxml Experiments
+# WordAddInExample
+Word add-in example

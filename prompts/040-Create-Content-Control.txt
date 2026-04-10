@@ -1,0 +1,10 @@
+Make a new button in the task pane after the modTableCell-2-2 button.  Name this button createContentControl.  Put on the next row.  When the user clicks this button, do the following.
+
+Create a content control around the current selection:
+
+const serviceNameRange = context.document.getSelection();
+const serviceNameContentControl = serviceNameRange.insertContentControl();
+serviceNameContentControl.title = "Service Name";
+serviceNameContentControl.tag = "serviceName";
+serviceNameContentControl.appearance = "Tags";
+serviceNameContentControl.color = "blue";

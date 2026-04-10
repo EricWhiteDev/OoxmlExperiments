@@ -1,0 +1,3 @@
+Make a new button in the task pane after the modTableCell-1-1 button.  Name this button modTableCell-2-2.  Put on the next row.  When the user clicks this button, do the following.
+
+Find the first table in the document.  If there is no table, then do nothing.  If there is a table, then change the text of cell 2,2 (the upper left corner) to "Biz Buzz"

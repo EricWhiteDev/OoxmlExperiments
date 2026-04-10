@@ -1,0 +1,7 @@
+Make a simple React TypeScript module named Experiments:
+  - This module is a Word JavaScript/TypeScript add-in.
+  - There will be a task pane that will be operational when run as a Word JavaScript add-in
+  - Put 8 buttons in this task pane.  The text of the buttons will be Button1, Button2, etc.
+  - Do whatever is necessary in order to side-load this app as a Word add-in.
+
+Ask me questions to clarify the product requirements, technical requirements, engineering principles, and hard constraints.

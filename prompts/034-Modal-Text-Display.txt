@@ -1,0 +1,11 @@
+Create a scrollable text box control to the task pane.  This text box can scroll in both the horizontal and vertical directions.  This text box control resizes in the horizontal direction if the taskpane is resized.  Just below the text box, put a button - Copy to Clipboard.  Make the button contain text in 8 point font, which will match the buttons up above in the task pane.  Just above the text box, put a Title text box.  Make the text in this title text box be 12 point, and bold. Above the Title text box, add a horizontal line to visually separate the this new area from the buttons up above.  Anchor all of these new controls to the bottom of the task pane.
+
+If the user presses the Copy to Clipboard button, then copy the text to the clipboard.
+
+in taskpane.ts, in the function ooxmlPartialPara, after getting the XDocument of the main document part:
+
+const xDoc = await mainPart.getXDocument();
+
+Then serialize the xDoc to an indented string (use the built-in method of LtXmlTs to do so) and set the scrollable text box to the indented XML:
+- set the title to "Main Document Part"
+

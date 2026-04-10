@@ -1,0 +1,17 @@
+Add a button to the taskpane named "body.paragraphs".  Make it 8 point, and put it just below the uppercase/lowercase buttons.
+
+WHen this new button is clicked:
+
+Get the paragraphs collection.
+
+Add text to the end of second paragraph, like this:
+
+await Word.run(async (context) => {
+  const paragraphs = context.document.body.paragraphs;
+  paragraphs.load();
+  await context.sync();
+
+  paragraphs.items[1].insertText(' New sentence in the paragraph.',
+                                   Word.InsertLocation.end);
+  await context.sync();
+});

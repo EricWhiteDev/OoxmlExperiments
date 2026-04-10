@@ -1,0 +1,4 @@
+Make a new button in the task pane.  Name this button intenseReference.  When the user clicks this button, get the first paragraph, and set the style to intenseReference, like this;
+
+const firstParagraph = context.document.body.paragraphs.getFirst();
+firstParagraph.styleBuiltIn = Word.BuiltInStyleName.intenseReference;

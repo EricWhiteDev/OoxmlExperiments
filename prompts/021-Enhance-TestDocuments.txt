@@ -1,0 +1,6 @@
+Enhance the TestDocuments class.  Add a Map<string, string> field named TestDocumentsMap.
+
+Initialize TestDocumentsMap with the following pairs:
+  "ericsResume", TestDocuments.ericsResume()
+  "35pager", TestDocuments.fictitious35pager()
+  "125pager", TestDocuments.fictitious125pager()

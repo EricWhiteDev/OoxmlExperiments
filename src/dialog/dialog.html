@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Experiment</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        padding: 24px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 2em;
+        margin-bottom: 24px;
+      }
+      button {
+        padding: 8px 24px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="label"></h1>
+    <button id="closeBtn">Close</button>
+    <script>
+      Office.onReady(function () {
+        var params = new URLSearchParams(window.location.search);
+        document.getElementById("label").textContent = params.get("label") || "(no label)";
+        document.getElementById("closeBtn").addEventListener("click", function () {
+          Office.context.ui.messageParent("close");
+        });
+      });
+    </script>
+  </body>
+</html>
