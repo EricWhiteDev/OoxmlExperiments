@@ -168,6 +168,27 @@ export async function getMainPart(source: OoxmlSource): Promise<string | null> {
   }
 }
 
+export async function getNumPart(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const numPart = await mainPart.numberingDefinitionsPart();
+      if (!numPart) {
+        return null;
+      }
+      const xDoc = await numPart.getXDocument();
+      return xDoc.toStringWithIndentation();
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function getStyleDefPart(source: OoxmlSource): Promise<string | null> {
   try {
     return await Word.run(async (context) => {

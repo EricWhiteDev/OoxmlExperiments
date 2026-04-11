@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -85,6 +85,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickGetNumPart = async () => {
+    const result = await getNumPart();
+    if (result) {
+      setTextViewerTitle("Numbering Part");
+      setTextViewerText(result);
+    }
+  };
   const onClickSetRunStyleOnSelection = async () => {
     const result = await setRunStyleOnSelection();
     if (result) {
@@ -164,6 +171,7 @@ const App: React.FC = () => {
       </div>
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleDefPart}>Get Style Def Part</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetNumPart}>Get Num Part</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>
