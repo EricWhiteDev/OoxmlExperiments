@@ -263,6 +263,54 @@ export async function setStyleUsingOoxml(): Promise<string | null> {
   }
 }
 
+export async function setStyleWrong(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+
+      // Set the 3rd paragraph's style to HappyBold (without adding the style definition)
+      const mainXDoc = await mainPart.getXDocument();
+      const mainBody = mainXDoc.root!.element(W.body)!;
+      const paragraphs = mainBody.elements(W.p);
+      if (paragraphs.length >= 3) {
+        const thirdPara = paragraphs[2];
+        let pPr = thirdPara.element(W.pPr);
+        if (!pPr) {
+          pPr = new XElement(W.pPr);
+          thirdPara.addFirst(pPr);
+        }
+        let pStyleEl = pPr.element(W.pStyle);
+        if (pStyleEl) {
+          pStyleEl.attribute(W.val)!.value = "HappyBold";
+        } else {
+          pStyleEl = new XElement(W.pStyle, new XAttribute(W.val, "HappyBold"));
+          pPr.addFirst(pStyleEl);
+        }
+      }
+      mainPart.putXDocument(mainXDoc);
+
+      // Serialize for display (formatted) and for insertion (unformatted)
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+      const displayXDoc = XDocument.parse(flatOpc);
+      const displayXml = displayXDoc.toStringWithIndentation();
+
+      // Put the modified document back into Word
+      body.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      return displayXml;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function setDocumentBody(xml: string) {
   try {
     await Word.run(async (context) => {
