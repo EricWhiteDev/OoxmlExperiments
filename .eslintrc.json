@@ -4,5 +4,9 @@
   ],
   "extends": [
     "plugin:office-addins/react"
-  ]
+  ],
+  "rules": {
+    "curly": "error",
+    "brace-style": ["error", "1tbs"]
+  }
 }

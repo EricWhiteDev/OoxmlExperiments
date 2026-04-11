@@ -84,15 +84,33 @@ export async function getStyleInfo(): Promise<string | null> {
 
         const pf = style.paragraphFormat;
         const pfParts: string[] = [];
-        if (pf.alignment !== undefined) pfParts.push(`alignment=${pf.alignment}`);
-        if (pf.firstLineIndent !== undefined) pfParts.push(`firstLineIndent=${pf.firstLineIndent}`);
-        if (pf.leftIndent !== undefined) pfParts.push(`leftIndent=${pf.leftIndent}`);
-        if (pf.rightIndent !== undefined) pfParts.push(`rightIndent=${pf.rightIndent}`);
-        if (pf.lineSpacing !== undefined) pfParts.push(`lineSpacing=${pf.lineSpacing}`);
-        if (pf.spaceBefore !== undefined) pfParts.push(`spaceBefore=${pf.spaceBefore}`);
-        if (pf.spaceAfter !== undefined) pfParts.push(`spaceAfter=${pf.spaceAfter}`);
-        if (pf.outlineLevel !== undefined) pfParts.push(`outlineLevel=${pf.outlineLevel}`);
-        if (pfParts.length > 0) lines.push(`  paragraphFormat: ${pfParts.join(", ")}`);
+        if (pf.alignment !== undefined) {
+          pfParts.push(`alignment=${pf.alignment}`);
+        }
+        if (pf.firstLineIndent !== undefined) {
+          pfParts.push(`firstLineIndent=${pf.firstLineIndent}`);
+        }
+        if (pf.leftIndent !== undefined) {
+          pfParts.push(`leftIndent=${pf.leftIndent}`);
+        }
+        if (pf.rightIndent !== undefined) {
+          pfParts.push(`rightIndent=${pf.rightIndent}`);
+        }
+        if (pf.lineSpacing !== undefined) {
+          pfParts.push(`lineSpacing=${pf.lineSpacing}`);
+        }
+        if (pf.spaceBefore !== undefined) {
+          pfParts.push(`spaceBefore=${pf.spaceBefore}`);
+        }
+        if (pf.spaceAfter !== undefined) {
+          pfParts.push(`spaceAfter=${pf.spaceAfter}`);
+        }
+        if (pf.outlineLevel !== undefined) {
+          pfParts.push(`outlineLevel=${pf.outlineLevel}`);
+        }
+        if (pfParts.length > 0) {
+          lines.push(`  paragraphFormat: ${pfParts.join(", ")}`);
+        }
 
         lines.push(`  type: ${style.type}`);
         lines.push("");
@@ -150,7 +168,9 @@ export async function getStyleDefPart(): Promise<string | null> {
       const pkg = await WmlPackage.open(ooxml.value);
       const mainPart = await pkg.mainDocumentPart();
       const stylePart = await mainPart.styleDefinitionsPart();
-      if (!stylePart) return null;
+      if (!stylePart) {
+        return null;
+      }
       const xDoc = await stylePart.getXDocument();
       return xDoc.toStringWithIndentation();
     });
