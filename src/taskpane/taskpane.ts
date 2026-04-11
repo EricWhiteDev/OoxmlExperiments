@@ -2,7 +2,7 @@
 
 import { UpperLowerExperiments } from "./UpperLowerExperiments";
 import { XDocument } from "ltxmlts";
-//import { WmlPackage } from "openxmlsdkts";
+import { WmlPackage } from "openxmlsdkts";
 
 export async function entireDocumentToUpper() {
   try {
@@ -106,7 +106,7 @@ export async function getStyleInfo(): Promise<string | null> {
   }
 }
 
-export async function getEntireDocument(): Promise<string | null> {
+export async function getPackageAsXml(): Promise<string | null> {
   try {
     return await Word.run(async (context) => {
       const body = context.document.body;
@@ -114,6 +114,44 @@ export async function getEntireDocument(): Promise<string | null> {
       await context.sync();
 
       const xDoc = XDocument.parse(ooxml.value);
+      return xDoc.toStringWithIndentation();
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
+export async function getMainPart(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxml = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxml.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const xDoc = await mainPart.getXDocument();
+      return xDoc.toStringWithIndentation();
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
+export async function getStyleDefPart(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxml = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxml.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const stylePart = await mainPart.styleDefinitionsPart();
+      if (!stylePart) return null;
+      const xDoc = await stylePart.getXDocument();
       return xDoc.toStringWithIndentation();
     });
   } catch (error) {

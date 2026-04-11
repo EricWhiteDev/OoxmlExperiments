@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getEntireDocument, getStyleInfo, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setDocumentBody } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
 
@@ -62,10 +62,24 @@ const App: React.FC = () => {
   const onClickButton5 = () => entireDocumentToLower();
   const [textViewerTitle, setTextViewerTitle] = React.useState("");
   const [textViewerText, setTextViewerText] = React.useState("");
-  const onClickGetEntireDocument = async () => {
-    const result = await getEntireDocument();
+  const onClickGetPackageAsXml = async () => {
+    const result = await getPackageAsXml();
     if (result) {
-      setTextViewerTitle("Entire Document");
+      setTextViewerTitle("Package as XML");
+      setTextViewerText(result);
+    }
+  };
+  const onClickGetMainPart = async () => {
+    const result = await getMainPart();
+    if (result) {
+      setTextViewerTitle("Main XDoc");
+      setTextViewerText(result);
+    }
+  };
+  const onClickGetStyleDefPart = async () => {
+    const result = await getStyleDefPart();
+    if (result) {
+      setTextViewerTitle("Style Definitions Part");
       setTextViewerText(result);
     }
   };
@@ -100,8 +114,15 @@ const App: React.FC = () => {
       <div className={styles.spacer} />
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetEntireDocument}>Get Entire Document</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleInfo}>Get Style Info</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetPackageAsXml}>Get Package as XML</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetMainPart}>Get Main Part</Button>
+      </div>
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleDefPart}>Get Style Def Part</Button>
+      </div>
+      <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleInfo}>Get Style Info from API</Button>
       </div>
       <div className={styles.textViewerSection}>
         <div className={styles.textViewerTitle}>{textViewerTitle}</div>
