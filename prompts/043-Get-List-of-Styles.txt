@@ -1,0 +1,19 @@
+Add a button to the right of "Get Entire Document".  Name it "Get Style Info".  when the user clicks, get the list of all styles in the document.
+
+Create a text based report of the styles.  For each style, add auxiliary information to the text report, indented below the style name.  Add the following:
+- description
+- baseStyle
+- builtIn
+- font name
+- inUse
+- languageId
+- linked
+- linkStyle
+- listLevelNumber
+- paragraphFormat
+- type (style type)
+- visibility
+
+After creating this text based report, set textViewerTitle to "Styles"
+Set textDisplay to the report.
+

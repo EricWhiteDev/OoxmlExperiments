@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getEntireDocument, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getEntireDocument, getStyleInfo, setDocumentBody } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
 
@@ -69,6 +69,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickGetStyleInfo = async () => {
+    const result = await getStyleInfo();
+    if (result) {
+      setTextViewerTitle("Styles");
+      setTextViewerText(result);
+    }
+  };
 
   return (
     <div className={styles.root}>
@@ -94,6 +101,7 @@ const App: React.FC = () => {
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetEntireDocument}>Get Entire Document</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleInfo}>Get Style Info</Button>
       </div>
       <div className={styles.textViewerSection}>
         <div className={styles.textViewerTitle}>{textViewerTitle}</div>

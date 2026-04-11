@@ -1,7 +1,8 @@
 /* global Word console */
 
 import { UpperLowerExperiments } from "./UpperLowerExperiments";
-import { WmlPackage } from "openxmlsdkts";
+import { XDocument } from "ltxmlts";
+//import { WmlPackage } from "openxmlsdkts";
 
 export async function entireDocumentToUpper() {
   try {
@@ -40,6 +41,71 @@ export async function entireDocumentToLower() {
 
 
 
+export async function getStyleInfo(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const styles = context.document.getStyles();
+      styles.load("items");
+      await context.sync();
+
+      for (const style of styles.items) {
+        style.load([
+          "nameLocal",
+          "baseStyle",
+          "linked",
+          "listLevelNumber",
+          "type",
+        ]);
+        style.font.load("name");
+        style.paragraphFormat.load([
+          "alignment",
+          "firstLineIndent",
+          "leftIndent",
+          "rightIndent",
+          "lineSpacing",
+          "spaceAfter",
+          "spaceBefore",
+          "outlineLevel",
+        ]);
+      }
+      await context.sync();
+
+      const lines: string[] = [];
+      for (const style of styles.items) {
+        lines.push(style.nameLocal);
+
+        let baseStyle = "";
+        try { baseStyle = style.baseStyle; } catch (_e) { /* no base style */ }
+        lines.push(`  baseStyle: ${baseStyle}`);
+
+        lines.push(`  font name: ${style.font.name}`);
+        lines.push(`  linked: ${style.linked}`);
+        lines.push(`  listLevelNumber: ${style.listLevelNumber}`);
+
+        const pf = style.paragraphFormat;
+        const pfParts: string[] = [];
+        if (pf.alignment !== undefined) pfParts.push(`alignment=${pf.alignment}`);
+        if (pf.firstLineIndent !== undefined) pfParts.push(`firstLineIndent=${pf.firstLineIndent}`);
+        if (pf.leftIndent !== undefined) pfParts.push(`leftIndent=${pf.leftIndent}`);
+        if (pf.rightIndent !== undefined) pfParts.push(`rightIndent=${pf.rightIndent}`);
+        if (pf.lineSpacing !== undefined) pfParts.push(`lineSpacing=${pf.lineSpacing}`);
+        if (pf.spaceBefore !== undefined) pfParts.push(`spaceBefore=${pf.spaceBefore}`);
+        if (pf.spaceAfter !== undefined) pfParts.push(`spaceAfter=${pf.spaceAfter}`);
+        if (pf.outlineLevel !== undefined) pfParts.push(`outlineLevel=${pf.outlineLevel}`);
+        if (pfParts.length > 0) lines.push(`  paragraphFormat: ${pfParts.join(", ")}`);
+
+        lines.push(`  type: ${style.type}`);
+        lines.push("");
+      }
+
+      return lines.join("\n");
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function getEntireDocument(): Promise<string | null> {
   try {
     return await Word.run(async (context) => {
@@ -47,9 +113,7 @@ export async function getEntireDocument(): Promise<string | null> {
       const ooxml = body.getOoxml();
       await context.sync();
 
-      const pkg = await WmlPackage.open(ooxml.value);
-      const mainPart = await pkg.mainDocumentPart();
-      const xDoc = await mainPart.getXDocument();
+      const xDoc = XDocument.parse(ooxml.value);
       return xDoc.toStringWithIndentation();
     });
   } catch (error) {
