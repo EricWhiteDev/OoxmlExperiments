@@ -1,0 +1,26 @@
+Below the button "Set Para Style on Selection", add a button, "Set Run Style on Selection".  When user clicks,
+
+Add the following style to the styles part.  To do this, get the Ooxml just for the selection.  using the OpenXmlSdtTs to get the main part, then the styles part, then add the style to the styles part:
+
+  <w:style w:type='character' w:customStyle='1' w:styleId='BoldingRun'>
+    <w:name w:val='BoldingRun' />
+    <w:basedOn w:val='DefaultParagraphFont' />
+    <w:uiPriority w:val='1' />
+    <w:qFormat />
+    <w:rsid w:val='00936926' />
+    <w:rPr>
+      <w:rFonts w:ascii='Courier New' w:hAnsi='Courier New' />
+      <w:b />
+      <w:i />
+    </w:rPr>
+  </w:style>
+
+Then use the OpenXmlSdkTs to get the main part.  Find the first run, and set the run properties as follows:
+
+        <w:rPr>
+          <w:rStyle w:val='BoldingRun' />
+        </w:rPr>
+
+Then serialize the entire WmlPackage to string with indenting, and set the setTextViewerTitle("Package After Setting Selection"), and  setTextViewerText to the formatted XML.
+
+Then serialize the entire WmlPackage to string without formatting, and replace the selection with the XML.

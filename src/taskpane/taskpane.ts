@@ -263,6 +263,159 @@ export async function setStyleUsingOoxml(): Promise<string | null> {
   }
 }
 
+export async function setParaStyleOnSelection(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const selection = context.document.getSelection();
+      const ooxmlResult = selection.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+
+      // Add the HappyBold style to the style definitions part
+      const mainPart = await pkg.mainDocumentPart();
+      const stylePart = await mainPart.styleDefinitionsPart();
+      if (!stylePart) {
+        return null;
+      }
+      const stylesXDoc = await stylePart.getXDocument();
+      const stylesRoot = stylesXDoc.root!;
+
+      const happyBoldStyle = new XElement(W.style,
+        new XAttribute(W.type, "paragraph"),
+        new XAttribute(W.customStyle, "1"),
+        new XAttribute(W.styleId, "HappyBold"),
+        new XElement(W._name, new XAttribute(W.val, "HappyBold")),
+        new XElement(W.basedOn, new XAttribute(W.val, "Normal")),
+        new XElement(W.qFormat),
+        new XElement(W.rsid, new XAttribute(W.val, "00084F40")),
+        new XElement(W.rPr,
+          new XElement(W.rFonts,
+            new XAttribute(W.ascii, "Courier New"),
+            new XAttribute(W.hAnsi, "Courier New"),
+          ),
+          new XElement(W.b),
+          new XElement(W.i),
+        ),
+      );
+      stylesRoot.add(happyBoldStyle);
+      stylePart.putXDocument(stylesXDoc);
+
+      // Set the first paragraph's style to HappyBold
+      const mainXDoc = await mainPart.getXDocument();
+      const mainBody = mainXDoc.root!.element(W.body)!;
+      const paragraphs = mainBody.elements(W.p);
+      if (paragraphs.length >= 1) {
+        const firstPara = paragraphs[0];
+        let pPr = firstPara.element(W.pPr);
+        if (!pPr) {
+          pPr = new XElement(W.pPr);
+          firstPara.addFirst(pPr);
+        }
+        let pStyleEl = pPr.element(W.pStyle);
+        if (pStyleEl) {
+          pStyleEl.attribute(W.val)!.value = "HappyBold";
+        } else {
+          pStyleEl = new XElement(W.pStyle, new XAttribute(W.val, "HappyBold"));
+          pPr.addFirst(pStyleEl);
+        }
+      }
+      mainPart.putXDocument(mainXDoc);
+
+      // Serialize for display (formatted) and for insertion (unformatted)
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+      const displayXDoc = XDocument.parse(flatOpc);
+      const displayXml = displayXDoc.toStringWithIndentation();
+
+      // Replace the selection with the modified XML
+      selection.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      return displayXml;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
+export async function setRunStyleOnSelection(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const selection = context.document.getSelection();
+      const ooxmlResult = selection.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+
+      // Add the BoldingRun character style to the style definitions part
+      const mainPart = await pkg.mainDocumentPart();
+      const stylePart = await mainPart.styleDefinitionsPart();
+      if (!stylePart) {
+        return null;
+      }
+      const stylesXDoc = await stylePart.getXDocument();
+      const stylesRoot = stylesXDoc.root!;
+
+      const boldingRunStyle = new XElement(W.style,
+        new XAttribute(W.type, "character"),
+        new XAttribute(W.customStyle, "1"),
+        new XAttribute(W.styleId, "BoldingRun"),
+        new XElement(W._name, new XAttribute(W.val, "BoldingRun")),
+        new XElement(W.basedOn, new XAttribute(W.val, "DefaultParagraphFont")),
+        new XElement(W.uiPriority, new XAttribute(W.val, "1")),
+        new XElement(W.qFormat),
+        new XElement(W.rsid, new XAttribute(W.val, "00936926")),
+        new XElement(W.rPr,
+          new XElement(W.rFonts,
+            new XAttribute(W.ascii, "Courier New"),
+            new XAttribute(W.hAnsi, "Courier New"),
+          ),
+          new XElement(W.b),
+          new XElement(W.i),
+        ),
+      );
+      stylesRoot.add(boldingRunStyle);
+      stylePart.putXDocument(stylesXDoc);
+
+      // Set the first run's style to BoldingRun
+      const mainXDoc = await mainPart.getXDocument();
+      const mainBody = mainXDoc.root!.element(W.body)!;
+      const runs = mainBody.descendants(W.r);
+      if (runs.length >= 1) {
+        const firstRun = runs[0];
+        let rPr = firstRun.element(W.rPr);
+        if (!rPr) {
+          rPr = new XElement(W.rPr);
+          firstRun.addFirst(rPr);
+        }
+        let rStyleEl = rPr.element(W.rStyle);
+        if (rStyleEl) {
+          rStyleEl.attribute(W.val)!.value = "BoldingRun";
+        } else {
+          rStyleEl = new XElement(W.rStyle, new XAttribute(W.val, "BoldingRun"));
+          rPr.addFirst(rStyleEl);
+        }
+      }
+      mainPart.putXDocument(mainXDoc);
+
+      // Serialize for display (formatted) and for insertion (unformatted)
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+      const displayXDoc = XDocument.parse(flatOpc);
+      const displayXml = displayXDoc.toStringWithIndentation();
+
+      // Replace the selection with the modified XML
+      selection.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      return displayXml;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function changeDefaultStyle(): Promise<string | null> {
   try {
     return await Word.run(async (context) => {

@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setStyleUsingOoxml, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -85,6 +85,20 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickSetRunStyleOnSelection = async () => {
+    const result = await setRunStyleOnSelection();
+    if (result) {
+      setTextViewerTitle("Package After Setting Selection");
+      setTextViewerText(result);
+    }
+  };
+  const onClickSetParaStyleOnSelection = async () => {
+    const result = await setParaStyleOnSelection();
+    if (result) {
+      setTextViewerTitle("Package After Setting Selection");
+      setTextViewerText(result);
+    }
+  };
   const onClickChangeDefaultStyle = async () => {
     const result = await changeDefaultStyle();
     if (result) {
@@ -154,8 +168,12 @@ const App: React.FC = () => {
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetStyleUsingOoxml}>Set Style using Ooxml</Button>
-        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetStyleWrong}>Set Style Wrong</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start", backgroundColor: "#d32f2f" }} onClick={onClickSetStyleWrong}>Set Style Wrong</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickChangeDefaultStyle}>Chg Dflt</Button>
+      </div>
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start", backgroundColor: "#d32f2f" }} onClick={onClickSetParaStyleOnSelection}>Set Para Style on Sel</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetRunStyleOnSelection}>Set Run Style on Sel</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>
