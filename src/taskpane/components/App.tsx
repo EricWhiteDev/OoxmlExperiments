@@ -1,8 +1,9 @@
 import React from "react";
 import {
-  Button, Dropdown, Option, makeStyles,
+  Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setStyleUsingOoxml, setDocumentBody } from "../taskpane";
+import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
 
@@ -60,26 +61,34 @@ const App: React.FC = () => {
 
   const onClickButton4 = () => entireDocumentToUpper();
   const onClickButton5 = () => entireDocumentToLower();
+  const [ooxmlSource, setOoxmlSource] = React.useState<OoxmlSource>("document");
   const [textViewerTitle, setTextViewerTitle] = React.useState("");
   const [textViewerText, setTextViewerText] = React.useState("");
   const onClickGetPackageAsXml = async () => {
-    const result = await getPackageAsXml();
+    const result = await getPackageAsXml(ooxmlSource);
     if (result) {
       setTextViewerTitle("Package as XML");
       setTextViewerText(result);
     }
   };
   const onClickGetMainPart = async () => {
-    const result = await getMainPart();
+    const result = await getMainPart(ooxmlSource);
     if (result) {
       setTextViewerTitle("Main XDoc");
       setTextViewerText(result);
     }
   };
   const onClickGetStyleDefPart = async () => {
-    const result = await getStyleDefPart();
+    const result = await getStyleDefPart(ooxmlSource);
     if (result) {
       setTextViewerTitle("Style Definitions Part");
+      setTextViewerText(result);
+    }
+  };
+  const onClickSetStyleUsingOoxml = async () => {
+    const result = await setStyleUsingOoxml();
+    if (result) {
+      setTextViewerTitle("Package After Mod");
       setTextViewerText(result);
     }
   };
@@ -113,12 +122,24 @@ const App: React.FC = () => {
       </div>
       <div className={styles.spacer} />
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
+      <RadioGroup
+        layout="horizontal"
+        value={ooxmlSource}
+        onChange={(_e, data) => setOoxmlSource(data.value as OoxmlSource)}
+      >
+        <Radio value="document" label="Get Entire Document" />
+        <Radio value="selection" label="Get Selection" />
+      </RadioGroup>
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetPackageAsXml}>Get Package as XML</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetMainPart}>Get Main Part</Button>
       </div>
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleDefPart}>Get Style Def Part</Button>
+      </div>
+      <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetStyleUsingOoxml}>Set Style using Ooxml</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>

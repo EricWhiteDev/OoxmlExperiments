@@ -1,8 +1,24 @@
 /* global Word console */
 
 import { UpperLowerExperiments } from "./UpperLowerExperiments";
-import { XDocument } from "ltxmlts";
-import { WmlPackage } from "openxmlsdkts";
+import { XDocument, XElement, XAttribute } from "ltxmlts";
+import { WmlPackage, W } from "openxmlsdkts";
+
+export type OoxmlSource = "document" | "selection";
+
+export async function getOoxml(
+  context: Word.RequestContext,
+  source: OoxmlSource,
+): Promise<string> {
+  let ooxmlResult: OfficeExtension.ClientResult<string>;
+  if (source === "selection") {
+    ooxmlResult = context.document.getSelection().getOoxml();
+  } else {
+    ooxmlResult = context.document.body.getOoxml();
+  }
+  await context.sync();
+  return ooxmlResult.value;
+}
 
 export async function entireDocumentToUpper() {
   try {
@@ -124,14 +140,11 @@ export async function getStyleInfo(): Promise<string | null> {
   }
 }
 
-export async function getPackageAsXml(): Promise<string | null> {
+export async function getPackageAsXml(source: OoxmlSource): Promise<string | null> {
   try {
     return await Word.run(async (context) => {
-      const body = context.document.body;
-      const ooxml = body.getOoxml();
-      await context.sync();
-
-      const xDoc = XDocument.parse(ooxml.value);
+      const ooxml = await getOoxml(context, source);
+      const xDoc = XDocument.parse(ooxml);
       return xDoc.toStringWithIndentation();
     });
   } catch (error) {
@@ -140,14 +153,11 @@ export async function getPackageAsXml(): Promise<string | null> {
   }
 }
 
-export async function getMainPart(): Promise<string | null> {
+export async function getMainPart(source: OoxmlSource): Promise<string | null> {
   try {
     return await Word.run(async (context) => {
-      const body = context.document.body;
-      const ooxml = body.getOoxml();
-      await context.sync();
-
-      const pkg = await WmlPackage.open(ooxml.value);
+      const ooxml = await getOoxml(context, source);
+      const pkg = await WmlPackage.open(ooxml);
       const mainPart = await pkg.mainDocumentPart();
       const xDoc = await mainPart.getXDocument();
       return xDoc.toStringWithIndentation();
@@ -158,14 +168,11 @@ export async function getMainPart(): Promise<string | null> {
   }
 }
 
-export async function getStyleDefPart(): Promise<string | null> {
+export async function getStyleDefPart(source: OoxmlSource): Promise<string | null> {
   try {
     return await Word.run(async (context) => {
-      const body = context.document.body;
-      const ooxml = body.getOoxml();
-      await context.sync();
-
-      const pkg = await WmlPackage.open(ooxml.value);
+      const ooxml = await getOoxml(context, source);
+      const pkg = await WmlPackage.open(ooxml);
       const mainPart = await pkg.mainDocumentPart();
       const stylePart = await mainPart.styleDefinitionsPart();
       if (!stylePart) {
@@ -173,6 +180,82 @@ export async function getStyleDefPart(): Promise<string | null> {
       }
       const xDoc = await stylePart.getXDocument();
       return xDoc.toStringWithIndentation();
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
+export async function setStyleUsingOoxml(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+
+      // Add the HappyBold style to the style definitions part
+      const mainPart = await pkg.mainDocumentPart();
+      const stylePart = await mainPart.styleDefinitionsPart();
+      if (!stylePart) {
+        return null;
+      }
+      const stylesXDoc = await stylePart.getXDocument();
+      const stylesRoot = stylesXDoc.root!;
+
+      const happyBoldStyle = new XElement(W.style,
+        new XAttribute(W.type, "paragraph"),
+        new XAttribute(W.customStyle, "1"),
+        new XAttribute(W.styleId, "HappyBold"),
+        new XElement(W._name, new XAttribute(W.val, "HappyBold")),
+        new XElement(W.basedOn, new XAttribute(W.val, "Normal")),
+        new XElement(W.qFormat),
+        new XElement(W.rsid, new XAttribute(W.val, "00084F40")),
+        new XElement(W.rPr,
+          new XElement(W.rFonts,
+            new XAttribute(W.ascii, "Courier New"),
+            new XAttribute(W.hAnsi, "Courier New"),
+          ),
+          new XElement(W.b),
+          new XElement(W.i),
+        ),
+      );
+      stylesRoot.add(happyBoldStyle);
+      stylePart.putXDocument(stylesXDoc);
+
+      // Set the 3rd paragraph's style to HappyBold
+      const mainXDoc = await mainPart.getXDocument();
+      const mainBody = mainXDoc.root!.element(W.body)!;
+      const paragraphs = mainBody.elements(W.p);
+      if (paragraphs.length >= 3) {
+        const thirdPara = paragraphs[2];
+        let pPr = thirdPara.element(W.pPr);
+        if (!pPr) {
+          pPr = new XElement(W.pPr);
+          thirdPara.addFirst(pPr);
+        }
+        let pStyleEl = pPr.element(W.pStyle);
+        if (pStyleEl) {
+          pStyleEl.attribute(W.val)!.value = "HappyBold";
+        } else {
+          pStyleEl = new XElement(W.pStyle, new XAttribute(W.val, "HappyBold"));
+          pPr.addFirst(pStyleEl);
+        }
+      }
+      mainPart.putXDocument(mainXDoc);
+
+      // Serialize for display (formatted) and for insertion (unformatted)
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+      const displayXDoc = XDocument.parse(flatOpc);
+      const displayXml = displayXDoc.toStringWithIndentation();
+
+      // Put the modified document back into Word
+      body.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      return displayXml;
     });
   } catch (error) {
     console.log("Error: " + error);

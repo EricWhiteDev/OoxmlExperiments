@@ -1,0 +1,15 @@
+Below the "Get Style Def Part" button, add another horizontal line.
+
+To right of, "Set Style using Ooxml", add button "Set Style Wrong".  When user clicks,
+
+Then use the OpenXmlSdkTs to get the main part.  Find the third paragraph, and set the paragraph properties as follows:
+
+      <w:pPr>
+        <w:pStyle w:val='HappyBold' />
+      </w:pPr>
+
+Note that this does not add HappyBold style to the styles part.  Want to see what Word does when I do this.
+
+Then serialize the entire WmlPackage to string with indenting, and set the setTextViewerTitle("Package After Mod"), and  setTextViewerText to the formatted XML.
+
+Then serialize the entire WmlPackage to string without formatting, and put it back into the word document.

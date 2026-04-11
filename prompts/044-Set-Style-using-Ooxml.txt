@@ -1,0 +1,27 @@
+Below the "Get Style Def Part" button, add another horizontal line.
+
+Below that, add a button, "Set Style using Ooxml".  When user clicks,
+
+Add the following style to the styles part.  To do this, get the Ooxml for the entire document.  using the OpenXmlSdtTs to get the main part, then the styles part, then add the style to the styles part:
+
+  <w:style w:type='paragraph' w:customStyle='1' w:styleId='HappyBold' xmlns:w='http://schemas.openxmlformats.org/wordprocessingml/2006/main'>
+    <w:name w:val='HappyBold' />
+    <w:basedOn w:val='Normal' />
+    <w:qFormat />
+    <w:rsid w:val='00084F40' />
+    <w:rPr>
+      <w:rFonts w:ascii='Courier New' w:hAnsi='Courier New' />
+      <w:b />
+      <w:i />
+    </w:rPr>
+  </w:style>
+
+Then use the OpenXmlSdkTs to get the main part.  Find the third paragraph, and set the paragraph properties as follows:
+
+      <w:pPr>
+        <w:pStyle w:val='HappyBold' />
+      </w:pPr>
+
+Then serialize the entire WmlPackage to string with indenting, and set the setTextViewerTitle("Package After Mod"), and  setTextViewerText to the formatted XML.
+
+Then serialize the entire WmlPackage to string without formatting, and put it back into the word document.
