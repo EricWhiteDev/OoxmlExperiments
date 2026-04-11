@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setStyleUsingOoxml, setStyleWrong, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getStyleInfo, setStyleUsingOoxml, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -85,6 +85,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickChangeDefaultStyle = async () => {
+    const result = await changeDefaultStyle();
+    if (result) {
+      setTextViewerTitle("Package After Change of Default Style");
+      setTextViewerText(result);
+    }
+  };
   const onClickSetStyleWrong = async () => {
     const result = await setStyleWrong();
     if (result) {
@@ -148,6 +155,7 @@ const App: React.FC = () => {
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetStyleUsingOoxml}>Set Style using Ooxml</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetStyleWrong}>Set Style Wrong</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickChangeDefaultStyle}>Chg Dflt</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>

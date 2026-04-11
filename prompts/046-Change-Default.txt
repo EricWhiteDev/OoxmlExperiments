@@ -1,0 +1,23 @@
+To right of, "Set Style Wrong", add button "Chg Dflt".  When user clicks,
+
+Get the entire package in ooxml.
+
+Find the style where w:type=='paragraph' and w:default=='1'.  Remove the w:default attribute.
+
+Add the following style to the styles part.  To do this, get the Ooxml for the entire document.  using the OpenXmlSdtTs to get the main part, then the styles part, then add the style to the styles part:
+
+  <w:style w:type='paragraph' w:default='1' w:customStyle='1' w:styleId='HappyBold' xmlns:w='http://schemas.openxmlformats.org/wordprocessingml/2006/main'>
+    <w:name w:val='HappyBold' />
+    <w:basedOn w:val='Normal' />
+    <w:qFormat />
+    <w:rsid w:val='00084F40' />
+    <w:rPr>
+      <w:rFonts w:ascii='Courier New' w:hAnsi='Courier New' />
+      <w:b />
+      <w:i />
+    </w:rPr>
+  </w:style>
+
+Then serialize the entire WmlPackage to string with indenting, and set the setTextViewerTitle("Package After Change of Default Style"), and  setTextViewerText to the formatted XML.
+
+Then serialize the entire WmlPackage to string without formatting, and put it back into the word document.

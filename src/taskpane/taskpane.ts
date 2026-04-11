@@ -263,6 +263,72 @@ export async function setStyleUsingOoxml(): Promise<string | null> {
   }
 }
 
+export async function changeDefaultStyle(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const stylePart = await mainPart.styleDefinitionsPart();
+      if (!stylePart) {
+        return null;
+      }
+      const stylesXDoc = await stylePart.getXDocument();
+      const stylesRoot = stylesXDoc.root!;
+
+      // Find the paragraph style with w:default='1' and remove the default attribute
+      const allStyles = stylesRoot.elements(W.style);
+      for (const s of allStyles) {
+        const typeAttr = s.attribute(W.type);
+        const defaultAttr = s.attribute(W._default);
+        if (typeAttr && typeAttr.value === "paragraph" && defaultAttr && defaultAttr.value === "1") {
+          defaultAttr.remove();
+          break;
+        }
+      }
+
+      // Add the HappyBold style as the new default paragraph style
+      const happyBoldStyle = new XElement(W.style,
+        new XAttribute(W.type, "paragraph"),
+        new XAttribute(W._default, "1"),
+        new XAttribute(W.customStyle, "1"),
+        new XAttribute(W.styleId, "HappyBold"),
+        new XElement(W._name, new XAttribute(W.val, "HappyBold")),
+        new XElement(W.basedOn, new XAttribute(W.val, "Normal")),
+        new XElement(W.qFormat),
+        new XElement(W.rsid, new XAttribute(W.val, "00084F40")),
+        new XElement(W.rPr,
+          new XElement(W.rFonts,
+            new XAttribute(W.ascii, "Courier New"),
+            new XAttribute(W.hAnsi, "Courier New"),
+          ),
+          new XElement(W.b),
+          new XElement(W.i),
+        ),
+      );
+      stylesRoot.add(happyBoldStyle);
+      stylePart.putXDocument(stylesXDoc);
+
+      // Serialize for display (formatted) and for insertion (unformatted)
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+      const displayXDoc = XDocument.parse(flatOpc);
+      const displayXml = displayXDoc.toStringWithIndentation();
+
+      // Put the modified document back into Word
+      body.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      return displayXml;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function setStyleWrong(): Promise<string | null> {
   try {
     return await Word.run(async (context) => {

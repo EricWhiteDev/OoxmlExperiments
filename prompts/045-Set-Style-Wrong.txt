@@ -1,5 +1,3 @@
-Below the "Get Style Def Part" button, add another horizontal line.
-
 To right of, "Set Style using Ooxml", add button "Set Style Wrong".  When user clicks,
 
 Then use the OpenXmlSdkTs to get the main part.  Find the third paragraph, and set the paragraph properties as follows:
