@@ -160,6 +160,64 @@ export async function getStyleInfo(): Promise<string | null> {
   }
 }
 
+export async function getCustomXmlInfo(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const customParts = await mainPart.customXmlParts();
+
+      const lines: string[] = [];
+      lines.push(`Custom XML Parts: ${customParts.length}`);
+      lines.push("");
+
+      for (let i = 0; i < customParts.length; i++) {
+        const part = customParts[i];
+        lines.push(`--- Part ${i + 1} ---`);
+        lines.push(`URI: ${part.getUri()}`);
+        lines.push(`Content Type: ${part.getContentType()}`);
+
+        const propsPart = await part.customXmlPropertiesPart();
+        if (propsPart) {
+          const propsXDoc = await propsPart.getXDocument();
+          const propsRoot = propsXDoc.root;
+          if (propsRoot) {
+            const itemIdAttr = propsRoot.attributes().find(a => a.name.localName === "itemID");
+            if (itemIdAttr) {
+              lines.push(`Item ID: ${itemIdAttr.value}`);
+            }
+          }
+        }
+
+        const xDoc = await part.getXDocument();
+        const root = xDoc.root;
+        if (root) {
+          lines.push(`Root Element: ${root.name.toString()}`);
+          const nsAttrs = root.attributes().filter(a => a.name.localName.startsWith("xmlns") || a.name.namespaceName === "http://www.w3.org/2000/xmlns/");
+          if (nsAttrs.length > 0) {
+            lines.push("Namespaces:");
+            for (const ns of nsAttrs) {
+              lines.push(`  ${ns.name.localName}: ${ns.value}`);
+            }
+          }
+        }
+
+        lines.push(`XML:\n${xDoc.toStringWithIndentation()}`);
+        lines.push("");
+      }
+
+      return lines.join("\n");
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function getPackageAsXml(source: OoxmlSource): Promise<string | null> {
   try {
     return await Word.run(async (context) => {

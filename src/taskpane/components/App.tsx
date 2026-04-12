@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -12,8 +12,8 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
-    padding: "16px",
-    gap: "10px",
+    padding: "8px 16px",
+    gap: "4px",
     boxSizing: "border-box",
     height: "100vh",
   },
@@ -27,15 +27,13 @@ const useStyles = makeStyles({
     minWidth: 0,
     flexShrink: 0,
   },
-  spacer: {
-    flex: 1,
-  },
   textViewerSection: {
     display: "flex",
     flexDirection: "column",
-    gap: "6px",
+    gap: "4px",
     minHeight: 0,
     flex: 1,
+    paddingBottom: "4px",
   },
   textViewerTitle: {
     fontSize: "12pt",
@@ -134,6 +132,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickGetCustomXmlInfo = async () => {
+    const result = await getCustomXmlInfo();
+    if (result) {
+      setTextViewerTitle("Custom XML Parts");
+      setTextViewerText(result);
+    }
+  };
   const onClickGetStyleInfo = async () => {
     const result = await getStyleInfo();
     if (result) {
@@ -162,7 +167,6 @@ const App: React.FC = () => {
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickButton4}>To Upper Case</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickButton5}>To Lower Case</Button>
       </div>
-      <div className={styles.spacer} />
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <RadioGroup
         layout="horizontal"
@@ -196,6 +200,7 @@ const App: React.FC = () => {
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleInfo}>Get Style Info from API</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetCustomXmlInfo}>Get Custom XML Info</Button>
       </div>
       <div className={styles.textViewerSection}>
         <div className={styles.textViewerTitle}>{textViewerTitle}</div>
