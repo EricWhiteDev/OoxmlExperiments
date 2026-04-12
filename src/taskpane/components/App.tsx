@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -106,6 +106,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickSetNumberingStyle = async () => {
+    const result = await setNumberingStyle();
+    if (result) {
+      setTextViewerTitle("Package After Setting Numbering");
+      setTextViewerText(result);
+    }
+  };
   const onClickChangeDefaultStyle = async () => {
     const result = await changeDefaultStyle();
     if (result) {
@@ -182,6 +189,9 @@ const App: React.FC = () => {
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start", backgroundColor: "#d32f2f" }} onClick={onClickSetParaStyleOnSelection}>Set Para Style on Sel</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetRunStyleOnSelection}>Set Run Style on Sel</Button>
+      </div>
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetNumberingStyle}>Set Numbering Style</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>

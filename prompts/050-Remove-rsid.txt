@@ -1,0 +1,9 @@
+When getting the ooxml from the multi-line edit control, some of the attributes are set by Word, and are not relevant when I compare an older to newer version.  Some of these are:
+
+w14:paraId w14:textId w:rsidR w:rsidRDefault
+
+There are other attributes that rsid in their attribute names.
+
+Before setting the multi-line text box in the task pane with the XML that we got (either the entire document, or from various parts), remove all of these attributes, so that comparing old and new versions is easier.
+
+Factor out this code to remove attributes into a function so that there is no code duplication.

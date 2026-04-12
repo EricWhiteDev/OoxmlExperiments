@@ -1,0 +1,139 @@
+Below the button "Set Para Style on Sel", add a button, "Set Numbering Style".  This will be in the next row of buttons.  When user clicks,
+
+In the 4th, 5th, and 6th paragraphs, add the following elements to the paragraph properties (w:pPr)
+
+              <w:pStyle w:val='ListParagraph' />
+              <w:numPr>
+                <w:ilvl w:val='0' />
+                <w:numId w:val='2' />
+              </w:numPr>
+
+Remove the w:ind element that is a child of w:pPr
+
+After modification, the paragraph properties will look like this:
+
+            <w:pPr>
+              <w:pStyle w:val='ListParagraph' />
+              <w:numPr>
+                <w:ilvl w:val='0' />
+                <w:numId w:val='2' />
+              </w:numPr>
+              <w:spacing w:after='120' />
+            </w:pPr>
+
+Get the numbering part.  You can get it by first getting the mainDocument part, and then getting the numbering part from the mainDocument part using a convenience function.
+
+In the numbering part, add a new abstractNum element that looks like this:
+
+        <w:abstractNum w:abstractNumId='1' w15:restartNumberingAfterBreak='0'>
+          <w:nsid w:val='4C7C037F' />
+          <w:multiLevelType w:val='hybridMultilevel' />
+          <w:tmpl w:val='98D4747E' />
+          <w:lvl w:ilvl='0' w:tplc='04090017'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerLetter' />
+            <w:lvlText w:val='%1)' />
+            <w:lvlJc w:val='left' />
+            <w:pPr>
+              <w:ind w:left='1440' w:hanging='360' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='1' w:tplc='04090019' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerLetter' />
+            <w:lvlText w:val='%2.' />
+            <w:lvlJc w:val='left' />
+            <w:pPr>
+              <w:ind w:left='2160' w:hanging='360' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='2' w:tplc='0409001B' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerRoman' />
+            <w:lvlText w:val='%3.' />
+            <w:lvlJc w:val='right' />
+            <w:pPr>
+              <w:ind w:left='2880' w:hanging='180' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='3' w:tplc='0409000F' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='decimal' />
+            <w:lvlText w:val='%4.' />
+            <w:lvlJc w:val='left' />
+            <w:pPr>
+              <w:ind w:left='3600' w:hanging='360' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='4' w:tplc='04090019' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerLetter' />
+            <w:lvlText w:val='%5.' />
+            <w:lvlJc w:val='left' />
+            <w:pPr>
+              <w:ind w:left='4320' w:hanging='360' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='5' w:tplc='0409001B' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerRoman' />
+            <w:lvlText w:val='%6.' />
+            <w:lvlJc w:val='right' />
+            <w:pPr>
+              <w:ind w:left='5040' w:hanging='180' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='6' w:tplc='0409000F' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='decimal' />
+            <w:lvlText w:val='%7.' />
+            <w:lvlJc w:val='left' />
+            <w:pPr>
+              <w:ind w:left='5760' w:hanging='360' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='7' w:tplc='04090019' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerLetter' />
+            <w:lvlText w:val='%8.' />
+            <w:lvlJc w:val='left' />
+            <w:pPr>
+              <w:ind w:left='6480' w:hanging='360' />
+            </w:pPr>
+          </w:lvl>
+          <w:lvl w:ilvl='8' w:tplc='0409001B' w:tentative='1'>
+            <w:start w:val='1' />
+            <w:numFmt w:val='lowerRoman' />
+            <w:lvlText w:val='%9.' />
+            <w:lvlJc w:val='right' />
+            <w:pPr>
+              <w:ind w:left='7200' w:hanging='180' />
+            </w:pPr>
+          </w:lvl>
+        </w:abstractNum>
+
+This should be the second child element of the w:numbering element.
+
+Add the following w:num element to the numbering part.  This is also a child of the w:numbering element.  This can be the last child of the w:numbering element.
+
+        <w:num w:numId='2' w16cid:durableId='708186538'>
+          <w:abstractNumId w:val='1' />
+        </w:num>
+
+If the styles part does not have a style named ListParagraph, then add the following style to the styles part.  using the OpenXmlSdtTs to get the main part, then the styles part, then add the style to the styles part as necessary:
+
+        <w:style w:type='paragraph' w:styleId='ListParagraph'>
+          <w:name w:val='List Paragraph' />
+          <w:basedOn w:val='Normal' />
+          <w:uiPriority w:val='34' />
+          <w:qFormat />
+          <w:rsid w:val='00440BBD' />
+          <w:pPr>
+            <w:ind w:left='720' />
+            <w:contextualSpacing />
+          </w:pPr>
+        </w:style>
+
+Then serialize the entire WmlPackage to string with indenting, and set the setTextViewerTitle("Package After Setting Selection"), and  setTextViewerText to the formatted XML.  Do the necessary rsid attribute removal.
+
+Then serialize the entire WmlPackage to string without formatting, and replace the selection with the XML.
