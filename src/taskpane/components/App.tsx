@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -111,6 +111,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickSwapEveryOtherPara = async () => {
+    const result = await swapEveryOtherPara();
+    if (result) {
+      setTextViewerTitle("Main document after swapping paras");
+      setTextViewerText(result);
+    }
+  };
   const onClickChangeDefaultStyle = async () => {
     const result = await changeDefaultStyle();
     if (result) {
@@ -196,6 +203,7 @@ const App: React.FC = () => {
       </div>
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSetNumberingStyle}>Set Numbering Style</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSwapEveryOtherPara}>Swap Every Other Para</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>

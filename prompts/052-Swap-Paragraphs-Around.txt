@@ -1,0 +1,5 @@
+To the right of the button "Set Numbering Style", add a button, "Swap Every Other Para".  When user clicks,
+
+Get the main document body part.  Go through the children of the body element, and swap every other body child element with the body child element after it.  For example, the 1st body child element (probably a paragraph) will become the second body child element, and second body child element will become the 1st.  The 3rd body child element will become the fourth, and 4th will become the 3rd.  The only exception to this is the w:sectPr element which is the last body child element. Regardless of how elements are swapped, the w:sectPr remains the last child of the body element.  If there are an odd number of children of the body element (excluding the w:sectPr element), then don't worry about swapping the last one.
+
+Then serialize the entire WmlPackage to string without formatting, and replace the selection with the XML.

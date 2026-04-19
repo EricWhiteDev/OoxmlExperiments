@@ -843,6 +843,56 @@ export async function setStyleWrong(): Promise<string | null> {
   }
 }
 
+export async function swapEveryOtherPara(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const mainXDoc = await mainPart.getXDocument();
+      const mainBody = mainXDoc.root!.element(W.body)!;
+
+      // Snapshot all child elements before mutating
+      const children = mainBody.elements();
+      const sectPr = children.find((el) => el.name.localName === "sectPr") ?? null;
+      const nonSectPr = children.filter((el) => el.name.localName !== "sectPr");
+
+      const newChildren = new Array<XElement>();
+      const count = nonSectPr.length - 1;
+
+      for (let i = 0; i < count; i += 2) {
+        newChildren.push(children[i + 1]);
+        newChildren.push(children[i]);
+      }
+
+      if (count % 2 === 1) {
+        newChildren.push(children[count]);
+      }
+      newChildren.push(sectPr);
+
+      mainBody.replaceNodes(newChildren);
+
+      mainPart.putXDocument(mainXDoc);
+
+      // Formatted display: clone main XDoc, strip transient attrs, indent
+      const displayXml = serializeWithoutTransientAttributes(mainXDoc);
+
+      // Serialize without formatting and replace the document body
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+      body.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      return displayXml;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
 export async function setDocumentBody(xml: string) {
   try {
     await Word.run(async (context) => {

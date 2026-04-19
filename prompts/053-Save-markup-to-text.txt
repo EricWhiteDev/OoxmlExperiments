@@ -1,0 +1,4 @@
+In the function swapEveryOtherPara, before serializing without formating and saving selection,
+
+Clone the XDocument.  Remove the necessary RSID attributes. Serialize to string with indenting, and set the setTextViewerTitle("Main document after swapping paras"), and  setTextViewerText to the formatted XML of the main document part.
+
