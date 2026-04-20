@@ -843,6 +843,162 @@ export async function setStyleWrong(): Promise<string | null> {
   }
 }
 
+const LEGAL_WORDS = [
+  "whereas", "hereinafter", "pursuant", "thereof", "hereof", "therein", "herein",
+  "notwithstanding", "indemnify", "covenant", "obligation", "liability", "warranty",
+  "representation", "jurisdiction", "arbitration", "adjudication", "enforceable",
+  "severability", "termination", "confidential", "proprietary", "disclosure",
+  "assignment", "sublicense", "intellectual", "infringement", "indemnification",
+  "negligence", "damages", "remedies", "injunctive", "equitable", "monetary",
+  "consideration", "counterpart", "execution", "performance", "compliance",
+  "regulatory", "statutory", "contractual", "provisions", "stipulation",
+  "acknowledgment", "affirmative", "mitigation", "subrogation", "indemnitor",
+  "indemnitee", "guarantor", "surety", "collateral", "lien", "encumbrance",
+  "subordination", "successor", "assignee", "licensor", "licensee", "grantor",
+  "grantee", "lessor", "lessee", "mortgagor", "mortgagee", "obligor", "obligee",
+  "plaintiff", "defendant", "claimant", "respondent", "arbitrator", "mediator",
+  "adjudicator", "tribunal", "forum", "venue", "jurisdiction", "governing",
+  "applicable", "enforceable", "irrevocable", "unconditional", "absolute",
+  "perpetual", "exclusive", "nonexclusive", "transferable", "nontransferable",
+  "revocable", "voidable", "material", "substantial", "reasonable", "customary",
+  "commercially", "expeditiously", "forthwith", "promptly", "immediately",
+  "contemporaneously", "simultaneously", "severally", "jointly", "explicitly",
+  "implicitly", "expressly", "constructively",
+];
+
+function xmlSpace(): XAttribute {
+  return new XAttribute(XNamespace.xml.getName("space"), "preserve");
+}
+
+function makeRunWithRpr(rPr: XElement | null, text: string): XElement {
+  if (rPr) {
+    return new XElement(W.r, new XElement(rPr), new XElement(W.t, xmlSpace(), text));
+  }
+  return new XElement(W.r, new XElement(W.t, xmlSpace(), text));
+}
+
+function addRandomRevTracking(mainBody: XElement): void {
+  let idCounter = 0;
+  const now = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+
+  // Collect paragraphs with > 5 words, up to 20
+  const eligibleParas: XElement[] = [];
+  for (const para of mainBody.elements(W.p)) {
+    const text = para.descendants(W.t).map((t) => t.value).join(" ");
+    const wordCount = text.split(/\s+/).filter((w) => w.length > 0).length;
+    if (wordCount > 5) {
+      eligibleParas.push(para);
+      if (eligibleParas.length === 20) {
+        break;
+      }
+    }
+  }
+
+  for (const para of eligibleParas) {
+    // --- Insert w:del ---
+    const runsForDel = para.elements(W.r);
+
+    type DelPoint =
+      | { type: "between"; afterRun: XElement }
+      | { type: "within"; run: XElement; pos: number };
+
+    const delPoints: DelPoint[] = [];
+
+    // Between adjacent runs
+    for (let i = 0; i < runsForDel.length - 1; i++) {
+      delPoints.push({ type: "between", afterRun: runsForDel[i] });
+    }
+
+    // Within a run at each space character
+    for (const run of runsForDel) {
+      const tEl = run.element(W.t);
+      if (!tEl) {
+        continue;
+      }
+      const text = tEl.value;
+      for (let i = 0; i < text.length; i++) {
+        if (text[i] === " ") {
+          delPoints.push({ type: "within", run, pos: i + 1 });
+        }
+      }
+    }
+
+    if (delPoints.length > 0) {
+      const point = delPoints[Math.floor(Math.random() * delPoints.length)];
+      const delEl = new XElement(W.del,
+        new XAttribute(W.id, String(idCounter++)),
+        new XAttribute(W.author, "Eric White"),
+        new XAttribute(W.date, now),
+        new XElement(W.r,
+          new XElement(W.delText, xmlSpace(), LEGAL_WORDS[Math.floor(Math.random() * LEGAL_WORDS.length)] + " "),
+        ),
+      );
+
+      if (point.type === "between") {
+        point.afterRun.addAfterSelf(delEl);
+      } else {
+        const run = point.run;
+        const rPr = run.element(W.rPr);
+        const text = run.element(W.t)!.value;
+        const leftRun = makeRunWithRpr(rPr, text.slice(0, point.pos));
+        const rightRun = makeRunWithRpr(rPr, text.slice(point.pos));
+        run.replaceWith(leftRun, delEl, rightRun);
+      }
+    }
+
+    // --- Insert w:ins ---
+    // Re-collect runs (excludes runs inside w:del just added)
+    const runsForIns = para.elements(W.r);
+
+    type WordEntry = { run: XElement; wordStart: number; wordEnd: number };
+    const wordEntries: WordEntry[] = [];
+
+    for (const run of runsForIns) {
+      const tEl = run.element(W.t);
+      if (!tEl) {
+        continue;
+      }
+      const text = tEl.value;
+      const wordRe = /\S+\s*/g;
+      let match: RegExpExecArray | null;
+      while ((match = wordRe.exec(text)) !== null) {
+        wordEntries.push({ run, wordStart: match.index, wordEnd: match.index + match[0].length });
+      }
+    }
+
+    if (wordEntries.length > 0) {
+      const entry = wordEntries[Math.floor(Math.random() * wordEntries.length)];
+      const { run, wordStart, wordEnd } = entry;
+      const rPr = run.element(W.rPr);
+      const text = run.element(W.t)!.value;
+      const wordText = text.slice(wordStart, wordEnd);
+      const wordRun = makeRunWithRpr(rPr, wordText);
+
+      const insEl = new XElement(W.ins,
+        new XAttribute(W.id, String(idCounter++)),
+        new XAttribute(W.author, "Eric White"),
+        new XAttribute(W.date, now),
+        wordRun,
+      );
+
+      if (wordStart === 0 && wordEnd === text.length) {
+        // Word covers entire run — wrap the run directly
+        run.replaceWith(insEl);
+      } else {
+        const pieces: XElement[] = [];
+        if (wordStart > 0) {
+          pieces.push(makeRunWithRpr(rPr, text.slice(0, wordStart)));
+        }
+        pieces.push(insEl);
+        if (wordEnd < text.length) {
+          pieces.push(makeRunWithRpr(rPr, text.slice(wordEnd)));
+        }
+        run.replaceWith(...pieces);
+      }
+    }
+  }
+}
+
 export async function swapEveryOtherPara(): Promise<string | null> {
   try {
     return await Word.run(async (context) => {
@@ -874,6 +1030,8 @@ export async function swapEveryOtherPara(): Promise<string | null> {
       newChildren.push(sectPr);
 
       mainBody.replaceNodes(newChildren);
+
+      addRandomRevTracking(mainBody);
 
       mainPart.putXDocument(mainXDoc);
 

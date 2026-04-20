@@ -1,0 +1,33 @@
+In the function swapEveryOtherPara, after swapping the paragraphs, but before preparing the XML for display (cloning and removing rsid attributes), then call a function to add some random revision tracking markup to the document.
+
+This function, named addRandomRevTracking will do the following:
+
+In the first 20 paragraphs that include more than 5 words of text, then insert a deleted word at some random point between words in the paragraph. The deleted word will be "dummy".  The markup looks like this:
+
+            <w:del w:id="0" w:author="Eric White" w:date="2026-04-19T19:20:00Z">
+                <w:r>
+                    <w:delText xml:space="preserve">dummy </w:delText>
+                </w:r>
+            </w:del>
+
+Note that the id should be incremented for every deleted run.  Set the w:athor attribute to "Eric White".  Set the w:date attribute to the date/time right now.
+
+Note that you will need to split the run at the point where the deleted word is placed.
+
+In the same first 20 paragraphs that include more than 5 words of text, take a word at random, and convert it to an inserted run.  The markup of the inserted run will look like this:
+
+            <w:ins w:id="1" w:author="Eric White" w:date="2026-04-19T19:21:00Z">
+                <w:r>
+                    <w:t xml:space="preserve">very </w:t>
+                </w:r>
+            </w:ins>
+
+Note that the w:id attribute will be a number that starts where the w:id attribute of the deleted runs leaves off.
+
+The inserted run, in the w:ins element, might be adjacent to the previously inserted deleted run, or it might be elsewhere.  If it is elsewhere, you may need to split the run at the point where the w:ins is inserted.
+
+Use the LtXmlTs api for this - keeping the code consistent with the rest of the code in swapEveryOtherPara.
+
+We note that if we tell Word to accept all tracked revisions, the document will contain the same content as before the revision tracking markup was added.
+
+Ask me questions to clarify the product requirements, technical requirements, engineering principles, and hard constraints.

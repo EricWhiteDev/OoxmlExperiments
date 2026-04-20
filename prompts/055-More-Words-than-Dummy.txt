@@ -1,0 +1,1 @@
+In the change that you just made, instead of always having the deleted word be "dummy", have the deleted word be one of 100 random words.  You can initialize an array of words using a random set of words that are typically used in legal documents.  This will look a little more realistic.
