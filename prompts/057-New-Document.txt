@@ -1,0 +1,7 @@
+Add another document to TestDocuments.ts.  The name of this document is example-35.  You can find the XML for the document at /Users/ericwhite/OoxmlExperiments/test-files/example-35.xml
+
+Format (indent) the XML before adding it to TestDocuments.ts.
+
+Also add it to testDocumentsMap in TestDocuments.ts
+
+The key is example-35

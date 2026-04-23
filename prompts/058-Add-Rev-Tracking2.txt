@@ -1,0 +1,15 @@
+In the code to swap paragraphs using JavaScript API, after swapping a pair of paragraphs, then call a function to add some random revision tracking markup to both paragraphs.
+
+This function, named addRandomRevTracking2 will do the following:
+
+If a paragraph includes more than 5 words of text, then insert a deleted word at some random point between words in the paragraph. Pick a random deleted word in the same fashion as the code that using LtXmlTs picks a random word.
+
+Again, if the paragraph includes more than 5 words of text, take a word at random, and convert it to an inserted run.
+
+The inserted word might be adjacent to the previously deleted run, or it might be elsewhere.
+
+You may need to turn "Track Changes" off and on at various points in order to execute this algorithm.
+
+We note that if we tell Word to accept all tracked revisions, the document will contain the same content as before the revision tracking markup was added.
+
+Ask me questions to clarify the product requirements, technical requirements, engineering principles, and hard constraints.

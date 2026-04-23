@@ -1051,6 +1051,34 @@ export async function swapEveryOtherPara(): Promise<string | null> {
   }
 }
 
+export async function swapEveryOtherParaUsingJs(): Promise<string> {
+  let pairsSwapped = 0;
+  await Word.run(async (context) => {
+    for (let i = 0; i < 40; i += 2) {
+      const paragraphs = context.document.body.paragraphs;
+      paragraphs.load("items");
+      await context.sync();
+
+      if (paragraphs.items.length <= i + 1) {
+        break;
+      }
+
+      const para1 = paragraphs.items[i];
+      const para2 = paragraphs.items[i + 1];
+
+      const ooxml2 = para2.getOoxml();
+      await context.sync();
+
+      para1.getRange().insertOoxml(ooxml2.value, Word.InsertLocation.before);
+      para2.delete();
+      await context.sync();
+
+      pairsSwapped++;
+    }
+  });
+  return `Swapped ${pairsSwapped} paragraph pairs using JavaScript API`;
+}
+
 export async function setDocumentBody(xml: string) {
   try {
     await Word.run(async (context) => {
