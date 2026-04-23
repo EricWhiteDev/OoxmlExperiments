@@ -1051,6 +1051,66 @@ export async function swapEveryOtherPara(): Promise<string | null> {
   }
 }
 
+async function addRandomRevTracking2(context: Word.RequestContext, paragraph: Word.Paragraph): Promise<void> {
+  // Get word ranges for this paragraph
+  const paraRange = paragraph.getRange();
+  const wordRanges = paraRange.getTextRanges([" "], true);
+  wordRanges.load("items");
+  await context.sync();
+
+  const wordCount = wordRanges.items.length;
+  if (wordCount <= 5) {
+    return;
+  }
+
+  // === Step 1: Add a deleted word (w:del) ===
+  // Pick a random legal word and a random position between existing words
+  const deletedWord = LEGAL_WORDS[Math.floor(Math.random() * LEGAL_WORDS.length)];
+  const insertIdx = Math.floor(Math.random() * (wordCount - 1)) + 1;
+
+  // Turn tracking OFF, insert the random word before a random word position
+  context.document.changeTrackingMode = Word.ChangeTrackingMode.off;
+  const insertedRange = wordRanges.items[insertIdx].insertText(deletedWord + " ", Word.InsertLocation.before);
+  await context.sync();
+
+  // Turn tracking ON, delete the inserted word (creates w:del)
+  context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
+  insertedRange.delete();
+  await context.sync();
+
+  // === Step 2: Convert a random existing word to an inserted run (w:ins) ===
+  // Reload word ranges since paragraph content changed
+  const paraRange2 = paragraph.getRange();
+  const wordRanges2 = paraRange2.getTextRanges([" "], true);
+  wordRanges2.load("items");
+  await context.sync();
+
+  if (wordRanges2.items.length <= 5) {
+    return;
+  }
+
+  const wordIdx = Math.floor(Math.random() * wordRanges2.items.length);
+  const targetWordRange = wordRanges2.items[wordIdx];
+  targetWordRange.load("text");
+  await context.sync();
+
+  const wordText = targetWordRange.text;
+
+  // Turn tracking OFF, delete the word (no revision mark)
+  context.document.changeTrackingMode = Word.ChangeTrackingMode.off;
+  const collapsedRange = targetWordRange.insertText("", Word.InsertLocation.replace);
+  await context.sync();
+
+  // Turn tracking ON, re-insert the same word (creates w:ins)
+  context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
+  collapsedRange.insertText(wordText, Word.InsertLocation.replace);
+  await context.sync();
+
+  // Restore tracking OFF
+  context.document.changeTrackingMode = Word.ChangeTrackingMode.off;
+  await context.sync();
+}
+
 export async function swapEveryOtherParaUsingJs(): Promise<string> {
   let pairsSwapped = 0;
   await Word.run(async (context) => {
@@ -1072,6 +1132,15 @@ export async function swapEveryOtherParaUsingJs(): Promise<string> {
       para1.getRange().insertOoxml(ooxml2.value, Word.InsertLocation.before);
       para2.delete();
       await context.sync();
+
+      // Reload paragraphs to get fresh references to the swapped pair
+      const freshParagraphs = context.document.body.paragraphs;
+      freshParagraphs.load("items");
+      await context.sync();
+
+      // Add random revision tracking to both swapped paragraphs
+      await addRandomRevTracking2(context, freshParagraphs.items[i]);
+      await addRandomRevTracking2(context, freshParagraphs.items[i + 1]);
 
       pairsSwapped++;
     }
