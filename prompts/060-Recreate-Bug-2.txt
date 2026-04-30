@@ -1,0 +1,39 @@
+For the button, "Test Ins/Del", modify the code to replace the first paragraph with this:
+
+  <w:p>
+    <w:r><w:t>The Borrower shall </w:t></w:r>
+    <w:ins w:id="0" w:author="Author A">
+      <w:r><w:t>reimburse</w:t></w:r>
+    </w:ins>
+    <w:del w:id="1" w:author="Author A">
+      <w:r><w:delText>repay</w:delText></w:r>
+    </w:del>
+    <w:r><w:t> the Lender.</w:t></w:r>
+  </w:p>
+
+To the right of the "Test Ins/Del" button, add a new button, "Stage2".  In that button, get the markup for the first paragraph, which now should be as set by the "Test Ins/Del" button.  Set the markup to the following:
+
+  <w:p>
+    <w:r><w:t>The Borrower shall </w:t></w:r>
+    <w:ins w:author="Author B">
+      <w:r><w:t>compensate</w:t></w:r>
+    </w:ins>
+    <w:ins w:author="Author A">
+      <w:del w:author="Author B">
+        <w:r><w:delText>reimburse</w:delText></w:r>
+      </w:del>
+    </w:ins>
+    <w:del w:author="Author A">
+      <w:r><w:delText>repay</w:delText></w:r>
+    </w:del>
+    <w:r><w:t> the Lender.</w:t></w:r>
+  </w:p>
+
+After replacing the first paragraph in the Stage2 button, get the text of the entire body of the document, serialize it for display, and
+
+      setTextViewerTitle("main doc body after replace");
+
+and
+
+      setTextViewerText to the formatted text of the body of the document.
+

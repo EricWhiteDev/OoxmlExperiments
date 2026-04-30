@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara, swapEveryOtherParaUsingJs, testInsDel } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara, swapEveryOtherParaUsingJs, testInsDel, stage2 } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -132,6 +132,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickStage2 = async () => {
+    const result = await stage2();
+    if (result) {
+      setTextViewerTitle("main doc body after replace");
+      setTextViewerText(result);
+    }
+  };
   const onClickChangeDefaultStyle = async () => {
     const result = await changeDefaultStyle();
     if (result) {
@@ -222,6 +229,7 @@ const App: React.FC = () => {
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSwapEveryOtherParaUsingJs}>Swap Using JavaScript</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickTestInsDel}>Test Ins/Del</Button>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickStage2}>Stage2</Button>
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #e0e0e0", margin: 0 }} />
       <div className={styles.row}>

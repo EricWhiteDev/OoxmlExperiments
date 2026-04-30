@@ -1174,38 +1174,21 @@ export async function testInsDel(): Promise<string | null> {
       }
 
       const para = paras[0];
-      const now = new Date().toISOString();
-      let idCounter = 100;
 
       const newPara = new XElement(W.p,
         new XElement(W.r,
           new XElement(W.t, xmlSpace(), "The Borrower shall "),
         ),
         new XElement(W.ins,
-          new XAttribute(W.id, String(idCounter++)),
+          new XAttribute(W.id, "0"),
           new XAttribute(W.author, "Author A"),
-          new XAttribute(W.date, now),
-          new XElement(W.del,
-            new XAttribute(W.id, String(idCounter++)),
-            new XAttribute(W.author, "Author B"),
-            new XAttribute(W.date, now),
-            new XElement(W.r,
-              new XElement(W.delText, xmlSpace(), "reimburse"),
-            ),
-          ),
-        ),
-        new XElement(W.ins,
-          new XAttribute(W.id, String(idCounter++)),
-          new XAttribute(W.author, "Author B"),
-          new XAttribute(W.date, now),
           new XElement(W.r,
-            new XElement(W.t, xmlSpace(), "compensate"),
+            new XElement(W.t, xmlSpace(), "reimburse"),
           ),
         ),
         new XElement(W.del,
-          new XAttribute(W.id, String(idCounter++)),
+          new XAttribute(W.id, "1"),
           new XAttribute(W.author, "Author A"),
-          new XAttribute(W.date, now),
           new XElement(W.r,
             new XElement(W.delText, xmlSpace(), "repay"),
           ),
@@ -1226,6 +1209,89 @@ export async function testInsDel(): Promise<string | null> {
       await context.sync();
 
       return displayXml;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
+export async function stage2(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const paragraphs = context.document.body.paragraphs;
+      paragraphs.load("items");
+      await context.sync();
+
+      if (paragraphs.items.length === 0) {
+        return null;
+      }
+
+      const firstPara = paragraphs.items[0];
+      const ooxmlResult = firstPara.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const mainXDoc = await mainPart.getXDocument();
+      const mainBody = mainXDoc.root!.element(W.body)!;
+      const paras = mainBody.elements(W.p);
+
+      if (paras.length === 0) {
+        return null;
+      }
+
+      const para = paras[0];
+
+      const newPara = new XElement(W.p,
+        new XElement(W.r,
+          new XElement(W.t, xmlSpace(), "The Borrower shall "),
+        ),
+        new XElement(W.ins,
+          new XAttribute(W.id, "0"),
+          new XAttribute(W.author, "Author B"),
+          new XElement(W.r,
+            new XElement(W.t, xmlSpace(), "compensate"),
+          ),
+        ),
+        new XElement(W.ins,
+          new XAttribute(W.id, "1"),
+          new XAttribute(W.author, "Author A"),
+          new XElement(W.del,
+            new XAttribute(W.id, "2"),
+            new XAttribute(W.author, "Author B"),
+            new XElement(W.r,
+              new XElement(W.delText, xmlSpace(), "reimburse"),
+            ),
+          ),
+        ),
+        new XElement(W.del,
+          new XAttribute(W.id, "3"),
+          new XAttribute(W.author, "Author A"),
+          new XElement(W.r,
+            new XElement(W.delText, xmlSpace(), "repay"),
+          ),
+        ),
+        new XElement(W.r,
+          new XElement(W.t, xmlSpace(), " the Lender."),
+        ),
+      );
+
+      para.replaceWith(newPara);
+      mainPart.putXDocument(mainXDoc);
+
+      const flatOpc = await pkg.saveToFlatOpcAsync();
+
+      firstPara.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      const bodyOoxmlResult = context.document.body.getOoxml();
+      await context.sync();
+
+      const bodyPkg = await WmlPackage.open(bodyOoxmlResult.value);
+      const bodyMainPart = await bodyPkg.mainDocumentPart();
+      const bodyXDoc = await bodyMainPart.getXDocument();
+      return serializeWithoutTransientAttributes(bodyXDoc);
     });
   } catch (error) {
     console.log("Error: " + error);
