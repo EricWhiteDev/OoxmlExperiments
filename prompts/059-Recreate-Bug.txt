@@ -1,0 +1,19 @@
+To the right of the button, Swap Using JavaScript, add a new button, "Test Ins/Del"
+
+In this button, get the first paragraph of the document, and replace the paragraph wth the following paragraph:
+
+  <w:p>
+    <w:r><w:t>The Borrower shall </w:t></w:r>
+    <w:ins w:author="Author A">
+      <w:del w:author="Author B">
+        <w:r><w:delText>reimburse</w:delText></w:r>
+      </w:del>
+    </w:ins>
+    <w:ins w:author="Author B">
+      <w:r><w:t>compensate</w:t></w:r>
+    </w:ins>
+    <w:del w:author="Author A">
+      <w:r><w:delText>repay</w:delText></w:r>
+    </w:del>
+    <w:r><w:t> the Lender.</w:t></w:r>
+  </w:p>
