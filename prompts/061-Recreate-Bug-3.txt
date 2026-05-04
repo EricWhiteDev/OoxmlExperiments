@@ -1,0 +1,7 @@
+Modify the code for "Test Ins/Del" and "Stage2".  Right now they get a para (getting the first paragraph from an array), and then call 
+ firstPara.insert0oxml(...) - a Word. Paragraph proxy
+
+However, instead of this, after determining the paragraph, get a range from the paragraph, call it replaceTargetRange, and then call 
+ replaceTargetRange.insert0oxml(...) - a Word. Range proxy
+
+I'm trying to determine if there is different behavior in para.insertOoxml and range.insertOoxml.

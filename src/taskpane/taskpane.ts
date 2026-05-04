@@ -1205,7 +1205,8 @@ export async function testInsDel(): Promise<string | null> {
       const displayXDoc = XDocument.parse(flatOpc);
       const displayXml = displayXDoc.toStringWithIndentation();
 
-      firstPara.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      const replaceTargetRange = firstPara.getRange();
+      replaceTargetRange.insertOoxml(flatOpc, Word.InsertLocation.replace);
       await context.sync();
 
       return displayXml;
@@ -1282,7 +1283,8 @@ export async function stage2(): Promise<string | null> {
 
       const flatOpc = await pkg.saveToFlatOpcAsync();
 
-      firstPara.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      const replaceTargetRange = firstPara.getRange();
+      replaceTargetRange.insertOoxml(flatOpc, Word.InsertLocation.replace);
       await context.sync();
 
       const bodyOoxmlResult = context.document.body.getOoxml();
