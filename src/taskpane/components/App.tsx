@@ -1,8 +1,8 @@
 import React from "react";
 import {
-  Button, Dropdown, Option, makeStyles, RadioGroup, Radio,
+  Button, Dropdown, Input, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara, swapEveryOtherParaUsingJs, testInsDel, stage2 } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, getParaIds, selectTextByParaId, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara, swapEveryOtherParaUsingJs, testInsDel, stage2 } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -62,6 +62,9 @@ const App: React.FC = () => {
   const [ooxmlSource, setOoxmlSource] = React.useState<OoxmlSource>("document");
   const [textViewerTitle, setTextViewerTitle] = React.useState("");
   const [textViewerText, setTextViewerText] = React.useState("");
+  const [targetParaId, setTargetParaId] = React.useState("");
+  const [startPos, setStartPos] = React.useState("");
+  const [endPos, setEndPos] = React.useState("");
   const onClickGetPackageAsXml = async () => {
     const result = await getPackageAsXml(ooxmlSource);
     if (result) {
@@ -174,6 +177,29 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickGetParaIds = async () => {
+    const result = await getParaIds();
+    if (result !== null) {
+      setTextViewerTitle("paraIds in this document");
+      setTextViewerText(result);
+    }
+  };
+  const onClickSelectParaIdRange = async () => {
+    const parsedStartPos = Number.parseInt(startPos, 10);
+    const parsedEndPos = Number.parseInt(endPos, 10);
+
+    if (!targetParaId.trim() || Number.isNaN(parsedStartPos) || Number.isNaN(parsedEndPos)) {
+      setTextViewerTitle("Select result");
+      setTextViewerText("Enter a targetParaId, startPos, and endPos.");
+      return;
+    }
+
+    const result = await selectTextByParaId(targetParaId, parsedStartPos, parsedEndPos);
+    if (result) {
+      setTextViewerTitle("Select result");
+      setTextViewerText(result);
+    }
+  };
 
   return (
     <div className={styles.root}>
@@ -235,6 +261,34 @@ const App: React.FC = () => {
       <div className={styles.row}>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetStyleInfo}>Get Style Info from API</Button>
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetCustomXmlInfo}>Get Custom XML Info</Button>
+      </div>
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickGetParaIds}>Get paraIds</Button>
+        <Input
+          name="targetParaId"
+          aria-label="targetParaId"
+          placeholder="paraId"
+          value={targetParaId}
+          onChange={(event) => setTargetParaId(event.currentTarget.value)}
+          style={{ width: "8ch", minWidth: "8ch" }}
+        />
+        <Input
+          name="startPos"
+          aria-label="startPos"
+          placeholder="start"
+          value={startPos}
+          onChange={(event) => setStartPos(event.currentTarget.value)}
+          style={{ width: "4ch", minWidth: "4ch" }}
+        />
+        <Input
+          name="endPos"
+          aria-label="endPos"
+          placeholder="end"
+          value={endPos}
+          onChange={(event) => setEndPos(event.currentTarget.value)}
+          style={{ width: "4ch", minWidth: "4ch" }}
+        />
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSelectParaIdRange}>Select</Button>
       </div>
       <div className={styles.textViewerSection}>
         <div className={styles.textViewerTitle}>{textViewerTitle}</div>

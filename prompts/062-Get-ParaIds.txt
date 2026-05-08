@@ -1,0 +1,21 @@
+Below the button "Get Style Info from API", add a new button, title = "Get paraIds".
+
+When the user clicks it:
+- get the entire document in Ooxml
+- Open with the OpenXmlSdkTs
+- Get the main document part
+- Get the XDocument for the main document part
+- Iterate through all the paragraphs, creating a list of the values of the w:paraId attribute in each paragraph.
+- Dump the list of paraId values to a string, separating each string with a newline
+= set the setTextViewerTitle("paraIds in this document"), and  setTextViewerText to the string that contains the list of para ids.
+
+To the right of the button "Get paraIds", add a new text box.  Make it wide enough for 8 characters. Name this text box "targetParaId".
+To the right of the textbox "targetParaId", add a new text box.  Make it wide enough for 4 characters.  Name this text box "startPos".
+To the right of the textbox "startPos", add a new text box.  Make it wide enough for 4 characters.  Name this text box "endPos"
+to the right of the textbox "endPos, add a new button, title = "Select".
+
+When the user clicks this button
+- get the paraId from the targetParaId
+- get the startPos from the startPos text box, and convert to an integer
+- get the endPos from the endPos text box, and convert to an integer
+- Find the paragraph in the document where the w:paraId attribute == the paraId from the targetParaId, and select the text starting with the startPos, and ending with the endPos.

@@ -40,6 +40,33 @@ function serializeWithoutTransientAttributes(xDoc: XDocument): string {
   return clone.toStringWithIndentation();
 }
 
+function getParaIdValue(para: XElement): string | null {
+  const paraIdAttr = para.attribute(W14.paraId)
+    ?? para.attributes().find((attr) => attr.name.localName === "paraId");
+  return paraIdAttr?.value ?? null;
+}
+
+async function getRangeAtCharIndex(
+  context: Word.RequestContext,
+  paragraph: Word.Paragraph,
+  charIdx: number,
+): Promise<Word.Range> {
+  if (charIdx === 0) {
+    return paragraph.getRange("Start");
+  }
+
+  const textBefore = paragraph.text.substring(0, charIdx);
+  const searchResults = paragraph.search(textBefore, { matchCase: true, matchWholeWord: false });
+  searchResults.load("items");
+  await context.sync();
+
+  if (searchResults.items.length === 0) {
+    throw new Error(`Unable to resolve character position ${charIdx}.`);
+  }
+
+  return searchResults.items[0].getRange("End");
+}
+
 export async function entireDocumentToUpper() {
   try {
     await Word.run(async (context) => {
@@ -71,6 +98,87 @@ export async function entireDocumentToLower() {
     });
   } catch (error) {
     console.log("Error: " + error);
+  }
+}
+
+export async function getParaIds(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const xDoc = await mainPart.getXDocument();
+      const root = xDoc.root;
+      if (!root) {
+        return "";
+      }
+
+      const paraIds = root.descendants(W.p).map((para) => getParaIdValue(para) ?? "");
+      return paraIds.join("\n");
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return null;
+  }
+}
+
+export async function selectTextByParaId(
+  targetParaId: string,
+  startPos: number,
+  endPos: number,
+): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const ooxmlResult = body.getOoxml();
+      await context.sync();
+
+      const pkg = await WmlPackage.open(ooxmlResult.value);
+      const mainPart = await pkg.mainDocumentPart();
+      const xDoc = await mainPart.getXDocument();
+      const root = xDoc.root;
+      if (!root) {
+        return "The document main part has no root element.";
+      }
+
+      const trimmedParaId = targetParaId.trim();
+      const paragraphsInOoxml = root.descendants(W.p);
+      const targetParagraphIdx = paragraphsInOoxml.findIndex((para) => getParaIdValue(para) === trimmedParaId);
+      if (targetParagraphIdx < 0) {
+        return `No paragraph found with paraId ${trimmedParaId}.`;
+      }
+
+      const paragraphs = context.document.body.paragraphs;
+      paragraphs.load("items");
+      await context.sync();
+
+      if (targetParagraphIdx >= paragraphs.items.length) {
+        return `Found paraId ${trimmedParaId} in OOXML, but no matching Word paragraph was available.`;
+      }
+
+      const targetParagraph = paragraphs.items[targetParagraphIdx];
+      targetParagraph.load("text");
+      await context.sync();
+
+      if (startPos < 0 || endPos < 0 || startPos > endPos || endPos > targetParagraph.text.length) {
+        return `Invalid range ${startPos}-${endPos}. Paragraph text length is ${targetParagraph.text.length}.`;
+      }
+
+      const startRange = await getRangeAtCharIndex(context, targetParagraph, startPos);
+      const range = startPos === endPos
+        ? startRange
+        : startRange.expandTo(await getRangeAtCharIndex(context, targetParagraph, endPos));
+      range.select();
+      await context.sync();
+
+      return `Selected paraId ${trimmedParaId}, characters ${startPos}-${endPos}.`;
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return "Error: " + error;
   }
 }
 
