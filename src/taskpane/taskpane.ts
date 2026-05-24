@@ -116,8 +116,12 @@ export async function getParaIds(): Promise<string | null> {
         return "";
       }
 
-      const paraIds = root.descendants(W.p).map((para) => getParaIdValue(para) ?? "");
-      return paraIds.join("\n");
+      const lines = root.descendants(W.p).map((para) => {
+        const paraId = getParaIdValue(para) ?? "";
+        const text = para.descendants(W.t).map((t) => t.value).join("").slice(0, 10);
+        return `${paraId} ${text}`;
+      });
+      return lines.join("\n");
     });
   } catch (error) {
     console.log("Error: " + error);
