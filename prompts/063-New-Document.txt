@@ -1,0 +1,7 @@
+Add another document to TestDocuments.ts.  The name of this document is test-headers-and-footers.  You can find the XML for the document at /Users/ericwhite/26-05-28-WIth-Headers-Footers/With-Headers-Footers.xml
+
+Format (indent) the XML before adding it to TestDocuments.ts.
+
+Also add it to testDocumentsMap in TestDocuments.ts
+
+The key is with-headers-footers
