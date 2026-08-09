@@ -2,7 +2,7 @@ import React from "react";
 import {
   Button, Dropdown, Input, Option, makeStyles, RadioGroup, Radio,
 } from "@fluentui/react-components";
-import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, getParaIds, selectTextByParaId, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara, swapEveryOtherParaUsingJs, testInsDel, stage2 } from "../taskpane";
+import { entireDocumentToUpper, entireDocumentToLower, getPackageAsXml, getMainPart, getStyleDefPart, getNumPart, getStyleInfo, getCustomXmlInfo, getParaIds, testRoundtrip, selectTextByParaId, setStyleUsingOoxml, setParaStyleOnSelection, setRunStyleOnSelection, setNumberingStyle, setStyleWrong, changeDefaultStyle, setDocumentBody, swapEveryOtherPara, swapEveryOtherParaUsingJs, testInsDel, stage2 } from "../taskpane";
 import type { OoxmlSource } from "../taskpane";
 import { TestDocuments } from "../TestDocuments";
 
@@ -184,6 +184,13 @@ const App: React.FC = () => {
       setTextViewerText(result);
     }
   };
+  const onClickTestRoundtrip = async () => {
+    const result = await testRoundtrip();
+    if (result !== null) {
+      setTextViewerTitle("Roundtrip paraId test");
+      setTextViewerText(result);
+    }
+  };
   const onClickSelectParaIdRange = async () => {
     const parsedStartPos = Number.parseInt(startPos, 10);
     const parsedEndPos = Number.parseInt(endPos, 10);
@@ -289,6 +296,9 @@ const App: React.FC = () => {
           style={{ width: "4ch", minWidth: "4ch" }}
         />
         <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickSelectParaIdRange}>Select</Button>
+      </div>
+      <div className={styles.row}>
+        <Button appearance="primary" style={{ fontSize: "8pt", minWidth: 0, padding: "2px 6px", alignSelf: "flex-start" }} onClick={onClickTestRoundtrip}>Test Roundtrip</Button>
       </div>
       <div className={styles.textViewerSection}>
         <div className={styles.textViewerTitle}>{textViewerTitle}</div>

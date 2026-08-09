@@ -1413,6 +1413,227 @@ export async function stage2(): Promise<string | null> {
   }
 }
 
+type StoryKind = "body" | "textbox";
+
+interface ParaSnapshot {
+  paraId: string | null;
+  story: StoryKind;
+  text: string;
+}
+
+function getStoryKind(para: XElement): StoryKind {
+  return para.ancestors(W.txbxContent).length > 0 ? "textbox" : "body";
+}
+
+function getParaText(para: XElement): string {
+  return para.descendants(W.t).map((t) => t.value).join("");
+}
+
+function snapshotParagraphs(root: XElement): ParaSnapshot[] {
+  return root.descendants(W.p).map((para) => ({
+    paraId: getParaIdValue(para),
+    story: getStoryKind(para),
+    text: getParaText(para),
+  }));
+}
+
+function deleteFirstCharacter(para: XElement): boolean {
+  const firstTextEl = para.descendants(W.t).find((t) => t.value.length > 0);
+  if (!firstTextEl) {
+    return false;
+  }
+  firstTextEl.value = firstTextEl.value.slice(1);
+  firstTextEl.setAttributeValue(XNamespace.xml.getName("space"), "preserve");
+  return true;
+}
+
+function abbreviate(text: string, maxLen: number): string {
+  const collapsed = text.replace(/\s+/g, " ").trim();
+  if (collapsed.length <= maxLen) {
+    return collapsed;
+  }
+  return collapsed.slice(0, maxLen - 1) + "…";
+}
+
+function pad(text: string, width: number): string {
+  return text.length >= width ? text : text + " ".repeat(width - text.length);
+}
+
+function describeSnapshotCounts(label: string, snapshots: ParaSnapshot[]): string[] {
+  const bodyCount = snapshots.filter((s) => s.story === "body").length;
+  const textboxCount = snapshots.filter((s) => s.story === "textbox").length;
+  const withParaId = snapshots.filter((s) => s.paraId !== null).length;
+  const distinct = new Set(snapshots.filter((s) => s.paraId !== null).map((s) => s.paraId as string));
+  return [
+    `${label}:`,
+    `  paragraphs:      ${snapshots.length} (body ${bodyCount}, textbox ${textboxCount})`,
+    `  with w14:paraId: ${withParaId}`,
+    `  distinct paraId: ${distinct.size}`,
+  ];
+}
+
+function storyOfParaId(snapshots: ParaSnapshot[], paraId: string): StoryKind {
+  const match = snapshots.find((s) => s.paraId === paraId);
+  return match ? match.story : "body";
+}
+
+function countByStory(paraIds: string[], snapshots: ParaSnapshot[]): string {
+  const bodyCount = paraIds.filter((id) => storyOfParaId(snapshots, id) === "body").length;
+  const textboxCount = paraIds.length - bodyCount;
+  return `${paraIds.length} (body ${bodyCount}, textbox ${textboxCount})`;
+}
+
+export async function testRoundtrip(): Promise<string | null> {
+  try {
+    return await Word.run(async (context) => {
+      const body = context.document.body;
+      const beforeOoxmlResult = body.getOoxml();
+      await context.sync();
+
+      const beforePkg = await WmlPackage.open(beforeOoxmlResult.value);
+      const beforeMainPart = await beforePkg.mainDocumentPart();
+      const beforeXDoc = await beforeMainPart.getXDocument();
+      const beforeRoot = beforeXDoc.root;
+      if (!beforeRoot) {
+        return "The document main part has no root element.";
+      }
+
+      const beforeSnapshots = snapshotParagraphs(beforeRoot);
+
+      // Choose the first five paragraphs that have content. A text box normally appears
+      // twice in the markup (mc:Choice and mc:Fallback), so paragraphs sharing a paraId are
+      // treated as one paragraph: they consume one slot and are all edited together.
+      const contentParas = beforeRoot.descendants(W.p).filter((para) => getParaText(para).length > 0);
+      const chosenParaIds = new Set<string>();
+      const chosenAnonymous: XElement[] = [];
+      let chosenCount = 0;
+      for (const para of contentParas) {
+        if (chosenCount >= 5) {
+          break;
+        }
+        const paraId = getParaIdValue(para);
+        if (paraId === null) {
+          chosenAnonymous.push(para);
+          chosenCount++;
+          continue;
+        }
+        if (chosenParaIds.has(paraId)) {
+          continue;
+        }
+        chosenParaIds.add(paraId);
+        chosenCount++;
+      }
+
+      const editLines: string[] = [];
+      const loggedParaIds = new Set<string>();
+      for (const para of contentParas) {
+        const paraId = getParaIdValue(para);
+        const isChosen = paraId !== null ? chosenParaIds.has(paraId) : chosenAnonymous.includes(para);
+        if (!isChosen) {
+          continue;
+        }
+        const textBefore = getParaText(para);
+        if (!deleteFirstCharacter(para)) {
+          continue;
+        }
+        if (paraId !== null && loggedParaIds.has(paraId)) {
+          continue;
+        }
+        if (paraId !== null) {
+          loggedParaIds.add(paraId);
+        }
+        editLines.push(
+          `  ${pad(paraId ?? "(none)", 10)} ${pad(getStoryKind(para), 8)} "${abbreviate(textBefore, 28)}" -> "${abbreviate(getParaText(para), 28)}"`,
+        );
+      }
+
+      beforeMainPart.putXDocument(beforeXDoc);
+      const flatOpc = await beforePkg.saveToFlatOpcAsync();
+
+      context.document.body.insertOoxml(flatOpc, Word.InsertLocation.replace);
+      await context.sync();
+
+      const afterOoxmlResult = context.document.body.getOoxml();
+      await context.sync();
+
+      const afterPkg = await WmlPackage.open(afterOoxmlResult.value);
+      const afterMainPart = await afterPkg.mainDocumentPart();
+      const afterXDoc = await afterMainPart.getXDocument();
+      const afterRoot = afterXDoc.root;
+      if (!afterRoot) {
+        return "After the replace, the document main part has no root element.";
+      }
+
+      const afterSnapshots = snapshotParagraphs(afterRoot);
+
+      const beforeIds = new Set(beforeSnapshots.filter((s) => s.paraId !== null).map((s) => s.paraId as string));
+      const afterIds = new Set(afterSnapshots.filter((s) => s.paraId !== null).map((s) => s.paraId as string));
+      const survived = Array.from(beforeIds).filter((id) => afterIds.has(id));
+      const lost = Array.from(beforeIds).filter((id) => !afterIds.has(id));
+      const minted = Array.from(afterIds).filter((id) => !beforeIds.has(id));
+      const survivalPct = beforeIds.size === 0 ? 0 : Math.round((survived.length / beforeIds.size) * 100);
+
+      const editedSurvived = Array.from(chosenParaIds).filter((id) => afterIds.has(id));
+
+      const lines: string[] = [];
+      lines.push("=== Roundtrip paraId test: whole-body insertOoxml(replace) ===");
+      lines.push("");
+      lines.push(...describeSnapshotCounts("Before replace", beforeSnapshots));
+      lines.push("");
+      lines.push(`Edited (first character deleted) in ${editLines.length} paragraph(s):`);
+      lines.push(...(editLines.length > 0 ? editLines : ["  (no paragraphs with content were found)"]));
+      lines.push("");
+      lines.push(...describeSnapshotCounts("After replace", afterSnapshots));
+      lines.push("");
+      lines.push("paraId set comparison:");
+      lines.push(`  survived (in both):   ${countByStory(survived, beforeSnapshots)}`);
+      lines.push(`  lost (before only):   ${countByStory(lost, beforeSnapshots)}`);
+      lines.push(`  re-minted (after only): ${countByStory(minted, afterSnapshots)}`);
+      lines.push(`  survival rate:        ${survivalPct}% of ${beforeIds.size} distinct paraIds`);
+      lines.push(`  edited paragraphs keeping their paraId: ${editedSurvived.length} of ${chosenParaIds.size}`);
+
+      if (beforeSnapshots.length === afterSnapshots.length) {
+        lines.push("");
+        lines.push("Positional comparison (paragraph index: before -> after):");
+        const maxDetail = 120;
+        for (let i = 0; i < Math.min(beforeSnapshots.length, maxDetail); i++) {
+          const beforeSnap = beforeSnapshots[i];
+          const afterSnap = afterSnapshots[i];
+          const same = beforeSnap.paraId !== null && beforeSnap.paraId === afterSnap.paraId;
+          const storyLabel = beforeSnap.story === afterSnap.story
+            ? beforeSnap.story
+            : `${beforeSnap.story}->${afterSnap.story}`;
+          lines.push(
+            `  ${pad(String(i), 4)} ${pad(storyLabel, 10)} ${pad(beforeSnap.paraId ?? "(none)", 10)} -> ${pad(afterSnap.paraId ?? "(none)", 10)} ${same ? "SAME" : "CHANGED"}  "${abbreviate(afterSnap.text, 24)}"`,
+          );
+        }
+        if (beforeSnapshots.length > maxDetail) {
+          lines.push(`  ... ${beforeSnapshots.length - maxDetail} more paragraph(s) not shown`);
+        }
+      } else {
+        lines.push("");
+        lines.push("Positional comparison skipped: the paragraph count changed across the replace.");
+      }
+
+      lines.push("");
+      if (beforeIds.size === 0) {
+        lines.push("Verdict: the document had no w14:paraId values to compare.");
+      } else if (lost.length === 0) {
+        lines.push("Verdict: every w14:paraId survived the whole-body insertOoxml(replace).");
+      } else if (survived.length === 0) {
+        lines.push("Verdict: no w14:paraId survived - Word re-minted every paraId across the whole-body insertOoxml(replace).");
+      } else {
+        lines.push(`Verdict: paraIds are only partially preserved - ${survived.length} survived and ${lost.length} were re-minted across the whole-body insertOoxml(replace).`);
+      }
+
+      return lines.join("\n");
+    });
+  } catch (error) {
+    console.log("Error: " + error);
+    return "Error: " + error;
+  }
+}
+
 export async function setDocumentBody(xml: string) {
   try {
     await Word.run(async (context) => {
